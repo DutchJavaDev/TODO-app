@@ -11,10 +11,13 @@ String _dirName = "TodoAppDocuments";
 String _settings = "appSettings.json";
 String _taskList = "taskList.json";
 
+/// All application settings will be stored in here, will be loaded once
 SettingsModel _settingsModel;
 
 SettingsModel get getSettingsModel => _settingsModel;
 
+/// This will run some checks before the application gets loaded
+/// Checks if all the app files exist if not then they get created
 Future<void> initFileSystem() async {
 
   final appDir = await getApplicationDocumentsDirectory();
@@ -39,6 +42,7 @@ Future<void> initFileSystem() async {
   _settingsModel = SettingsModel.fromMappedJson(await _getSettings());
 }
 
+/// For debuging 
 void listFiles() {
   var dir = Directory("$_dirPath");
   dir.list(recursive: true, followLinks: false).listen((FileSystemEntity i) {
@@ -56,6 +60,7 @@ void saveTaskList(String data) async {
   await file.writeAsString(data, mode: FileMode.write);
 }
 
+/// Reads a file as dynamic json list
 Future<List<Map<String, dynamic>>> _get(String name) async {
 
   var data = await File("$_dirPath/$name").readAsString();
@@ -65,6 +70,7 @@ Future<List<Map<String, dynamic>>> _get(String name) async {
   return (jsonDecode(data) as List<dynamic>).cast<Map<String, dynamic>>();
 }
 
+/// Reads a file as dynamic json map
 Future<Map<String, dynamic>> _getMap(String name) async {
 
   var data = await File("$_dirPath/$name").readAsString();
@@ -74,6 +80,8 @@ Future<Map<String, dynamic>> _getMap(String name) async {
   return (jsonDecode(data) as Map<dynamic,dynamic>).cast<String, dynamic>();
 }
 
+/// Loads the settings file
+/// Gets called once, at startup
 Future<Map<String, dynamic>> _getSettings() async {
   var settings =  await _getMap(_settings);
 
@@ -95,6 +103,7 @@ Future<Map<String, dynamic>> _getSettings() async {
   return settings;
 }
 
+/// Gets all the tasks
 Future<List<Map<String, dynamic>>> getTaskList() async {
   return await _get(_taskList);
 }

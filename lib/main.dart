@@ -47,11 +47,13 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
+  /// Opens the updateview with an id of null 
   void addTask() {
-    Navigator.push(context,animatedEditRoute());
+    Navigator.push(context,animatedUpdateRoute());
   }
 
-  Route animatedEditRoute({String id = "null"}) {
+  /// Simple animation for switching to the update/add task view
+  Route animatedUpdateRoute({String id = "null"}) {
     return PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => UpdateTaskList(
               taskId: id,
@@ -71,7 +73,8 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  Route animatedSettingRoute() {
+  /// Simple animation for switching to the completed task view
+  Route animatedCompletedTaskRoute() {
     return PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => CompletedTask(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -89,82 +92,23 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  void showSettings() async {
-    Navigator.push(context, animatedSettingRoute());
-    // await showDialog(
-    //     context: context,
-    //     barrierDismissible: false,
-    //     builder: (BuildContext context) {
-    //       return Dialog(
-    //         backgroundColor: Theme.of(context).backgroundColor,
-    //         shape: RoundedRectangleBorder(
-    //             borderRadius: BorderRadius.all(Radius.circular(12))),
-    //         child: Container(
-    //           width: screenWidth,
-    //           height: screenHeight * 0.17,
-    //           child: Padding(
-    //             padding:
-    //                 EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10),
-    //             child: ListView(
-    //               controller: ScrollController(),
-    //               children: <Widget>[
-    //                 RaisedButton(
-    //                   onPressed: () {
-    //                     TaskManager.deleteAll();
-    //                     setState(() {
-    //                       Navigator.of(context).pop();
-    //                     });
-    //                   },
-    //                   child: Row(
-    //                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //                     children: <Widget>[
-    //                       Text(
-    //                         "Delete all tasks 0",
-    //                         style: TextStyle(
-    //                             fontSize: 24,
-    //                             color: Colors.white,
-    //                             fontWeight: FontWeight.bold),
-    //                       ),
-    //                       Icon(
-    //                         FontAwesomeIcons.solidTrashAlt,
-    //                         size: 28,
-    //                         color: Colors.black,
-    //                       ),
-    //                     ],
-    //                   ),
-    //                   color: Color(0xffe53935),
-    //                 ),
-    //                 Padding(
-    //                   padding: EdgeInsets.only(top: 10),
-    //                   child: MaterialButton(
-    //                     onPressed: () => Navigator.of(context).pop(),
-    //                     child: Text(
-    //                       "Close",
-    //                       style: TextStyle(fontSize: 24, color: Colors.white),
-    //                     ),
-    //                     color: Theme.of(context).buttonColor,
-    //                   ),
-    //                 )
-    //               ],
-    //             ),
-    //           ),
-    //         ),
-    //       );
-    //     });
+  /// Opens settings
+  void showSettings() {
+    Navigator.push(context, animatedCompletedTaskRoute());
   }
 
+  /// Opens the updateview with the given task id
   void editTask(String id) {
-    Navigator.of(context).push(animatedEditRoute(id: id));
+    Navigator.push(context,animatedUpdateRoute(id: id));
   }
 
-  void doneTask(String id) {
-    var model = TaskManager.getTaskById(id);
-    model.taskDone = true;
-    TaskManager.updateTask(model);
+  /// Updates the given task to done
+  void setTaskToDone(String id) {
+    TaskManager.flipTaskStatus(id);
     setState(() {});
   }
 
-
+  /// Creates the views for the tasks, adds a delete and edit button
   List<Widget> createView() {
     var items = List<Widget>();
     int counter = 0;
@@ -199,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
               size: 24,
             ),
             onPressed: () {
-              doneTask(task.taskId);
+              setTaskToDone(task.taskId);
             },
           ),
                   RaisedButton(

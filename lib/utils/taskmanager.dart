@@ -46,13 +46,13 @@ void updateTask(TaskModel model) {
 }
 
 /// Resets a task
-void revertTask(String id)
+void flipTaskStatus(String id)
 {
   final model = _tasks.where((i) => i.taskId == id).single;
 
   if(model != null)
   {
-    model.taskDone = false;
+    model.taskDone = !false;
     updateTask(model);
   }
 }

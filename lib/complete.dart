@@ -162,7 +162,7 @@ class CompleteTaskStateWidget extends State<CompletedTaskState>
               size: 32,
             ),
             onPressed: () {
-              TaskManager.revertTask(task.taskId);
+              TaskManager.flipTaskStatus(task.taskId);
               setState(() {});
             },
           ),
