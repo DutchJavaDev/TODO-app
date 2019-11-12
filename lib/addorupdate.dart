@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'models/models.dart';
 import 'utils/taskmanager.dart' as TaskManager;
 import 'utils/filesys.dart' as FileSys;
@@ -33,7 +35,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
   Color taskColor;
   bool isEnabled = false;
 
-  final hightLight = Color(0xffffd600);
+  final hightLight = Colors.yellowAccent;
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
@@ -119,6 +121,90 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     }
   }
 
+  void addNewColor() async {
+    var color = Colors.white;
+
+    await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Pick a color"),
+            content: SingleChildScrollView(
+              child: ColorPicker(
+                onColorChanged: (newColor) {
+                  color = newColor;
+                },
+                pickerColor: color,
+                enableAlpha: true,
+                enableLabel: true,
+                pickerAreaHeightPercent: 0.8,
+              ),
+            ),
+            actions: <Widget>[
+              RaisedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                color: Colors.red,
+                child: Text(
+                  "Close",
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  FileSys.getSettingsModel.backgroundColors.add(color);
+                  FileSys.saveSettings();
+                  setState(() {
+                    Navigator.of(context).pop();
+                  });
+                },
+                child: Text(
+                  "Add color",
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
+              )
+            ],
+          );
+        });
+  }
+
+  List<Widget> createColorGrid() {
+    var colors = List<Widget>();
+    var backgroundColors = FileSys.getSettingsModel.backgroundColors;
+
+    for (var i = 0; i < backgroundColors.length; i++) {
+      colors.add(Container(
+        child: Padding(
+          child: RaisedButton(
+            onPressed: () => setColor(i),
+            color: backgroundColors[i],
+          ),
+          padding: EdgeInsets.only(left: 5, right: 5),
+        ),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            color: taskColor == backgroundColors[i]
+                ? hightLight
+                : Colors.transparent),
+      ));
+    }
+    
+    /// max 12 colors
+    if(backgroundColors.length != 12)
+    {
+      colors.add(RaisedButton(
+      onPressed: addNewColor,
+      color: Theme.of(context).buttonColor,
+      child: Icon(
+        FontAwesomeIcons.plusCircle,
+        size: 24,
+        color: Colors.white,
+      ),
+    ));
+    }
+    return colors;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -126,6 +212,24 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
           "${widget.taskId == "null" ? "Add task" : "Edit: ${titleController.text}"}",
           style: TextStyle(fontSize: 24),
         ),
+      ),
+      bottomNavigationBar: MaterialButton(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+        child: Text(
+          "${(isEnabled ? "Save" : "Waiting...")}",
+          style: TextStyle(fontSize: 28, color: Colors.white),
+        ),
+        color: Theme.of(context).buttonColor,
+        onPressed: isEnabled
+            ? () {
+                if (submitTask()) {
+                  Navigator.pop(context);
+                }
+              }
+            : null,
+        height: 64,
       ),
       body: GestureDetector(
         onTap: () {
@@ -179,130 +283,16 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 ],
               ),
               Padding(
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Container(
-                      child: Padding(
-                        child: RaisedButton(
-                          onPressed: () => setColor(0),
-                          color: FileSys.getSettingsModel.backgroundColors[0],
-                        ),
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color:
-                              taskColor == FileSys.getSettingsModel.backgroundColors[0]
-                                  ? hightLight
-                                  : Colors.transparent),
-                    ),
-                    Container(
-                      child: Padding(
-                        child: RaisedButton(
-                          onPressed: () => setColor(1),
-                          color: FileSys.getSettingsModel.backgroundColors[1],
-                        ),
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color:
-                              taskColor == FileSys.getSettingsModel.backgroundColors[1]
-                                  ? hightLight
-                                  : Colors.transparent),
-                    ),
-                    Container(
-                      child: Padding(
-                        child: RaisedButton(
-                          onPressed: () => setColor(2),
-                          color: FileSys.getSettingsModel.backgroundColors[2],
-                        ),
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color:
-                              taskColor == FileSys.getSettingsModel.backgroundColors[2]
-                                  ? hightLight
-                                  : Colors.transparent),
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Container(
-                      child: Padding(
-                        child: RaisedButton(
-                          onPressed: () => setColor(3),
-                          color: FileSys.getSettingsModel.backgroundColors[3],
-                        ),
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color:
-                              taskColor == FileSys.getSettingsModel.backgroundColors[3]
-                                  ? hightLight
-                                  : Colors.transparent),
-                    ),
-                    Container(
-                      child: Padding(
-                        child: RaisedButton(
-                          onPressed: () => setColor(4),
-                          color: FileSys.getSettingsModel.backgroundColors[4],
-                        ),
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color:
-                              taskColor == FileSys.getSettingsModel.backgroundColors[4]
-                                  ? hightLight
-                                  : Colors.transparent),
-                    ),
-                    Container(
-                      child: Padding(
-                        child: RaisedButton(
-                          onPressed: () => setColor(5),
-                          color: FileSys.getSettingsModel.backgroundColors[5],
-                        ),
-                        padding: EdgeInsets.only(left: 5, right: 5),
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          color:
-                              taskColor == FileSys.getSettingsModel.backgroundColors[5]
-                                  ? hightLight
-                                  : Colors.transparent),
-                    )
-                  ],
-                )
-                  ],
+                child: GridView.count(
+                  crossAxisCount: 4,
+                  children: createColorGrid(),
+                  crossAxisSpacing: 5,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 3,
+                  shrinkWrap: true,
                 ),
                 padding: EdgeInsets.only(top: 25, bottom: 45),
               ),
-              Padding(
-                child: MaterialButton(
-                  child: Text(
-                    "${(isEnabled ? "Save" : "Waiting...")}",
-                    style: TextStyle(fontSize: 28, color: Colors.white),
-                  ),
-                  color: Theme.of(context).buttonColor,
-                  onPressed: isEnabled
-                      ? () {
-                          if (submitTask()) {
-                            Navigator.pop(context);
-                          }
-                        }
-                      : null,
-                  height: 64,
-                ),
-                padding: EdgeInsets.only(top: 15),
-              )
             ],
           ),
           padding: EdgeInsets.only(top: 15, left: 10, right: 10),
