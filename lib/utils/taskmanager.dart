@@ -52,7 +52,7 @@ void flipTaskStatus(String id)
 
   if(model != null)
   {
-    model.taskDone = !false;
+    model.taskDone = !model.taskDone;
     updateTask(model);
   }
 }
