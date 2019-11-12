@@ -50,9 +50,9 @@ void listFiles() {
   });
 }
 
-void saveSettings(String data) async {
+void saveSettings() async {
   var file = File("$_dirPath/$_settings");
-  await file.writeAsString(data, mode: FileMode.write);
+  await file.writeAsString(jsonEncode(_settingsModel.toJson()), mode: FileMode.write);
 }
 
 void saveTaskList(String data) async {
@@ -88,7 +88,7 @@ Future<Map<String, dynamic>> _getSettings() async {
   // means empty file
   if(settings.length == 0)
   {
-    var settings = SettingsModel(0,[
+    _settingsModel = SettingsModel(0,[
       Color(0xff7FC29B),
       Color(0xffEB9486),
       Color(0xffea80fc),
@@ -97,7 +97,7 @@ Future<Map<String, dynamic>> _getSettings() async {
       Color(0xffC2185B),
       ],
       Color(0xffbbdefb));
-    saveSettings(json.encode(settings.toJson()));
+    saveSettings();
     return await _getMap(_settings);
   }
   return settings;
