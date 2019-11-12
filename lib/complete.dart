@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:test_build/models/models.dart';
 import 'utils/taskmanager.dart' as TaskManager;
 import 'utils/filesys.dart' as FileSys;
 
