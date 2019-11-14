@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: EdgeInsets.only(
             bottom: 5, top: counter == 0 ? 5 : 0, left: 5, right: 5),
       ));
-
+      
       counter++;
     }
 
@@ -236,9 +236,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 showSettings();
               },
               child: Icon(
-                FontAwesomeIcons.cog,
+                Icons.settings,
                 color: Colors.white,
-                size: 28,
+                size: 32,
               ),
             ),
             FlatButton(

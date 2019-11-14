@@ -14,6 +14,7 @@ String _taskList = "taskList.json";
 /// All application settings will be stored in here, will be loaded once
 SettingsModel _settingsModel;
 
+/// Get the current loaded settings model
 SettingsModel get getSettingsModel => _settingsModel;
 
 /// This will run some checks before the application gets loaded

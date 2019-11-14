@@ -4,19 +4,34 @@ import 'dart:ui';
 class SettingsModel
 {
   int colorIndex;
-  List<Color> backgroundColors;
+  List<Color> _backgroundColors;
   Color taskHeaderColor;
 
-  SettingsModel(this.colorIndex,this.backgroundColors,this.taskHeaderColor);
+  List<Color> get getBackgroundColors => _backgroundColors;
+  
+
+  SettingsModel(this.colorIndex,this._backgroundColors,this.taskHeaderColor);
+
+
+  void removeColor(Color color)
+  {
+    _backgroundColors.removeWhere((i) => i.value == color.value);
+  }
+
+  void addColor(Color color)
+  {
+    _backgroundColors.add(color);
+  }
+
 
   SettingsModel.fromMappedJson(Map<String,dynamic> json) : 
     colorIndex = json["colorIndex"],
-    backgroundColors = _decodeColors(json["backgroundColors"]),
+    _backgroundColors = _decodeColors(json["backgroundColors"]),
     taskHeaderColor = Color(int.parse(json["taskHeaderColor"].toString()));
 
   Map<String,dynamic> toJson() => {
     "colorIndex":colorIndex,
-    "backgroundColors": _encodeColors(backgroundColors),
+    "backgroundColors": _encodeColors(_backgroundColors),
     "taskHeaderColor": taskHeaderColor.value
   };
 

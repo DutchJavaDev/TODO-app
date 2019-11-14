@@ -29,7 +29,9 @@ class UpdateTaskListStateFull extends StatefulWidget {
 }
 
 class UpdateTaskListState extends State<UpdateTaskListStateFull> {
+
   TaskModel model;
+  SettingsModel settings;
   String titleError;
   String descriptionError;
   Color taskColor;
@@ -42,10 +44,10 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
   @override
   void initState() {
     super.initState();
-
     /// Listen for changes in the input
     titleController.addListener(titleListener);
     descriptionController.addListener(descriptionListener);
+    settings = FileSys.getSettingsModel;
 
     if (!(widget.taskId == "null")) {
       model = TaskManager.getTaskById(widget.taskId);
@@ -55,7 +57,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     } else {
       titleController.text = "";
       descriptionController.text = "";
-      taskColor = FileSys.getSettingsModel.backgroundColors[0];
+      taskColor = settings.getBackgroundColors[0];
     }
     titleError = "";
     descriptionError = "";
@@ -69,7 +71,6 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
       } else {
         titleError = "";
       }
-
       isEnabled = canSave();
     });
   }
@@ -82,7 +83,6 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
       } else {
         descriptionError = "";
       }
-
       isEnabled = canSave();
     });
   }
@@ -98,7 +98,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
 
   void setColor(int index) {
     setState(() {
-      taskColor = FileSys.getSettingsModel.backgroundColors[index];
+      taskColor = settings.getBackgroundColors[index];
     });
   }
 
@@ -121,15 +121,100 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     }
   }
 
+  List<Widget> createEditView()
+  {
+    var items = List<Widget>();
+
+    for(var color in settings.getBackgroundColors)
+    {
+      var row = Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 8),
+            child: Container(
+            width: MediaQuery.of(context).size.width*0.3,
+            height: 38,
+            color: color
+          ),
+          ),
+          RaisedButton(
+            onPressed: (){
+              // Bug, cant refresh the alertdialog
+              settings.removeColor(color);
+              if(taskColor == color)
+              {
+                taskColor = settings.getBackgroundColors.first;
+              }
+              setState(() {
+                
+              });
+              // Temp fix
+              Navigator.of(context).pop();
+
+              // To fix this i need to put the alertdialog in its own statefullwidget so i can refresh it
+              // when i delete a color
+            },
+            child: Text("Delete",style: TextStyle(color: Colors.white,fontSize: 20),),
+          )
+        ],
+      );
+
+      items.add(Padding(
+        padding: EdgeInsets.only(top: 2.5,bottom: 5),
+        child: row,
+      ));
+    }
+
+    return items;
+  }
+
+  void editColors() async
+  {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context)
+      {
+        return AlertDialog(
+          title: Center(child: Text("Edit Colors",style: TextStyle(fontSize: 24,color: Colors.white),),),
+          backgroundColor: Theme.of(context).backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12)
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: createEditView(),
+            ),
+          ),
+          actions: <Widget>[
+            Container(
+              width: MediaQuery.of(context).size.width*0.7,
+              child: RaisedButton(
+                color: Colors.red,
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text("Close",style: TextStyle(color: Colors.white, fontSize: 24),),
+              ),
+            )
+          ],
+        );
+      }
+    );
+  }
+
   void addNewColor() async {
-    var color = Colors.white;
+    var color = settings.taskHeaderColor;
 
     await showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Pick a color"),
+            title: Center(child: Text("Pick a color",style: TextStyle(fontSize: 24,color: Colors.white),),),
+            backgroundColor: Theme.of(context).backgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)
+            ),
             content: SingleChildScrollView(
               child: ColorPicker(
                 onColorChanged: (newColor) {
@@ -139,6 +224,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 enableAlpha: true,
                 enableLabel: true,
                 pickerAreaHeightPercent: 0.8,
+                paletteType: PaletteType.hsl,
               ),
             ),
             actions: <Widget>[
@@ -152,7 +238,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
               ),
               RaisedButton(
                 onPressed: () {
-                  FileSys.getSettingsModel.backgroundColors.add(color);
+                  settings.addColor(color);
                   FileSys.saveSettings();
                   setState(() {
                     Navigator.of(context).pop();
@@ -170,7 +256,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
 
   List<Widget> createColorGrid() {
     var colors = List<Widget>();
-    var backgroundColors = FileSys.getSettingsModel.backgroundColors;
+    var backgroundColors = settings.getBackgroundColors;
 
     for (var i = 0; i < backgroundColors.length; i++) {
       colors.add(Container(
@@ -188,20 +274,25 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 : Colors.transparent),
       ));
     }
-    
+
     /// max 12 colors
     if(backgroundColors.length != 12)
     {
       colors.add(RaisedButton(
-      onPressed: addNewColor,
-      color: Theme.of(context).buttonColor,
-      child: Icon(
-        FontAwesomeIcons.plusCircle,
-        size: 24,
-        color: Colors.white,
-      ),
-    ));
+        onPressed: addNewColor,
+        color: Theme.of(context).buttonColor,
+        child: Icon(
+          FontAwesomeIcons.plusCircle,
+          size: 24,
+          color: Colors.white,
+        ),
+      ));
     }
+
+    colors.add(RaisedButton(
+      onPressed: editColors,
+      child: Icon(Icons.settings,size: 28,color: Colors.white,),
+    ));
     return colors;
   }
 
