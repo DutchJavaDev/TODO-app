@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'utils/taskmanager.dart' as TaskManager;
 import 'utils/filesys.dart' as FileSys;
 
-class CompletedTask extends StatelessWidget
+class TasksCompleted extends StatelessWidget
 {
   @override
   Widget build(BuildContext context) {
-    return CompletedTaskState();
+    return TasksCompletedState();
   }
 }
 
-class CompletedTaskState extends StatefulWidget
+class TasksCompletedState extends StatefulWidget
 {
   @override
-  CompleteTaskStateWidget createState() => CompleteTaskStateWidget(); 
+  TasksCompletedWidget createState() => TasksCompletedWidget(); 
 }
 
-class CompleteTaskStateWidget extends State<CompletedTaskState>
+class TasksCompletedWidget extends State<TasksCompletedState>
 {
 
   double screenWidth;

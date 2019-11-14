@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'models/models.dart';
 import 'utils/taskmanager.dart' as TaskManager;
 import 'utils/filesys.dart' as FileSys;
+import 'widgets/coloreditwidget.dart';
 
 class UpdateTaskList extends StatelessWidget {
   final String taskId;
@@ -57,7 +58,13 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     } else {
       titleController.text = "";
       descriptionController.text = "";
-      taskColor = settings.getBackgroundColors[0];
+      if(settings.getBackgroundColors.length == 0)
+      {
+        taskColor = Colors.grey;
+      }
+      {
+        taskColor = settings.getBackgroundColors[0];
+      }
     }
     titleError = "";
     descriptionError = "";
@@ -171,35 +178,15 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
 
   void editColors() async
   {
-    await showDialog<void>(
+      await showDialog(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context)
       {
-        return AlertDialog(
-          title: Center(child: Text("Edit Colors",style: TextStyle(fontSize: 24,color: Colors.white),),),
-          backgroundColor: Theme.of(context).backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              children: createEditView(),
-            ),
-          ),
-          actions: <Widget>[
-            Container(
-              width: MediaQuery.of(context).size.width*0.7,
-              child: RaisedButton(
-                color: Colors.red,
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text("Close",style: TextStyle(color: Colors.white, fontSize: 24),),
-              ),
-            )
-          ],
-        );
+        return ColorEdit();
       }
     );
+    setState(() {});
   }
 
   void addNewColor() async {

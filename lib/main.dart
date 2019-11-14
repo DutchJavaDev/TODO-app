@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:test_build/complete.dart';
-import 'addorupdate.dart';
+import 'package:test_build/taskscomplete.dart';
+import 'package:test_build/updatetasklist.dart';
+import 'updatetasklist.dart';
 import 'utils/filesys.dart' as FileSys;
 import 'utils/taskmanager.dart' as TaskManager;
 
@@ -76,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Simple animation for switching to the completed task view
   Route animatedCompletedTaskRoute() {
     return PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => CompletedTask(),
+        pageBuilder: (context, animation, secondaryAnimation) => TasksCompleted(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           var begin = Offset(0, 1);
           var end = Offset.zero;
