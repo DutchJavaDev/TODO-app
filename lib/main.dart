@@ -13,6 +13,11 @@ import 'utils/taskmanager.dart' as TaskManager;
 void main() async {
   await FileSys.initFileSystem();
   await TaskManager.initManager();
+  
+  for(var i = 0; i < 20; i++)
+  {
+    TaskManager.addTask("Title_$i", "No place beter than home, yea i said so!");
+  }
 
   runApp(MyApp());
 }
@@ -104,12 +109,11 @@ class _MyHomePageState extends State<MyHomePage> {
         pageBuilder: (context, animation, secondaryAnimation) =>
             TasksCompleted(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          var begin = Offset(0, 1);
+          var begin = Offset(1, 0);
           var end = Offset.zero;
-          var curve = Curves.ease;
+          var curve = Curves.easeIn;
 
-          var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
           return SlideTransition(
             position: animation.drive(tween),
@@ -119,8 +123,51 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// Opens settings
-  void showSettings() {
-    Navigator.push(context, animatedCompletedTaskRoute());
+  void showSettings() async{
+    if(Platform.isAndroid)
+    {
+      Navigator.push(context, animatedCompletedTaskRoute());
+    }
+    else if (Platform.isIOS)
+    {
+      await showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context)
+        {
+          return CupertinoActionSheet(
+            title: Text("App settings",style: TextStyle(fontSize: 28)),
+            actions: <Widget>[
+              CupertinoButton(
+                onPressed: () async{
+
+                },
+                child: Text("Add task",style: TextStyle(fontSize: 22)),
+              ),
+              CupertinoButton(
+                onPressed: () async{
+                  await Navigator.push(context, animatedCompletedTaskRoute());
+                  Navigator.pop(context);
+                },
+                child: Text("View completd task's",style:TextStyle(fontSize: 22)),
+              ),
+              CupertinoButton(
+                onPressed: (){},
+                child: Text("Reset app",style: TextStyle(fontSize: 22,color: CupertinoColors.destructiveRed)),
+              ),
+              CupertinoButton(
+                onPressed: (){},
+                child: Text("Delete active task's",style: TextStyle(fontSize: 22,color: CupertinoColors.destructiveRed)),
+              )
+            ],
+            cancelButton: CupertinoButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancel"),
+              
+            ), 
+          );
+        }
+      );
+    }
   }
 
   /// Opens the updateview with the given task id
