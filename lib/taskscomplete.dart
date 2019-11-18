@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'utils/taskmanager.dart' as TaskManager;
 import 'utils/filesys.dart' as FileSys;
 
@@ -126,7 +130,8 @@ class TasksCompletedWidget extends State<TasksCompletedState>
         });
   }
 
-  List<Widget> createView() {
+  /// Creates the views for the tasks, adds a delete and edit button
+  List<Widget> createViewAndroid() {
     var items = List<Widget>();
     int counter = 0;
     for (var task in TaskManager.completedTask) {
@@ -155,23 +160,130 @@ class TasksCompletedWidget extends State<TasksCompletedState>
         children: <Widget>[
           RaisedButton(
             child: Icon(
-              Icons.replay,
+              FontAwesomeIcons.check,
               color: Colors.greenAccent,
-              size: 32,
+              size: 24,
             ),
             onPressed: () {
-              TaskManager.flipTaskStatus(task.taskId);
-              setState(() {});
+              
             },
           ),
           RaisedButton(
             child: Icon(
-              Icons.delete_forever,
-              color: Colors.redAccent,
-              size: 32,
+              FontAwesomeIcons.solidEdit,
+              color: Colors.blue[300],
+              size: 24,
             ),
             onPressed: () {
-              deleteTask(task.taskId);
+              
+            },
+          ),
+        ],
+      );
+
+      var column = Column(
+        children: <Widget>[
+          Padding(
+            child: header,
+            padding: EdgeInsets.only(bottom: 0, top: 0),
+          ),
+          Padding(
+            child: description,
+            padding: EdgeInsets.only(bottom: 20, left: 25, right: 25, top: 35),
+          ),
+          Padding(
+            child: buttonBar,
+            padding: EdgeInsets.only(bottom: 15, top: 5),
+          )
+        ],
+      );
+
+      var itemDecoration = BoxDecoration(
+          borderRadius: BorderRadius.circular(12), color: task.taskColor);
+      var container = Container(
+        child: column,
+        width: screenWidth,
+        decoration: itemDecoration,
+      );
+
+      items.add(Padding(
+        child: container,
+        padding: EdgeInsets.only(
+            bottom: 5, top: counter == 0 ? 5 : 0, left: 5, right: 5),
+      ));
+
+      counter++;
+    }
+
+    if (items.length == 0) {
+      items.add(Padding(
+        child: Center(
+          child: Text(
+            "Empty list",
+            style: TextStyle(
+                fontWeight: FontWeight.w400, fontSize: 24, color: Colors.white),
+          ),
+        ),
+        padding: EdgeInsets.only(top: screenHeight / 2.5),
+      ));
+    }
+    return items;
+  }
+
+  List<Widget> createViewIOS(){
+    var items = List<Widget>();
+    int counter = 0;
+    for (var task in TaskManager.completedTask) {
+      var headerText = Text("${task.taskTitle}",
+          style: TextStyle(
+              fontSize: 28,
+              color: Colors.black54,
+              fontWeight: FontWeight.bold));
+      var description = Text("${task.taskDescription}",
+          style: TextStyle(fontSize: 20, color: Colors.black54));
+
+      var headerDecoration = BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: FileSys.getSettingsModel.taskHeaderColor);
+      var header = Container(
+        child: Center(
+          child: headerText,
+        ),
+        width: screenWidth,
+        height: 50,
+        decoration: headerDecoration,
+      );
+
+      var buttonBar = Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          CupertinoButton(
+            child: Icon(
+              Icons.replay,
+              color: CupertinoColors.activeGreen,
+              size: 28,
+            ),
+            onPressed: () {
+              TaskManager.flipTaskStatus(task.taskId);
+              setState(() {
+                
+              });
+            },
+            color: Color(0xff054961),
+          ),
+          CupertinoButton(
+            child: Icon(
+              CupertinoIcons.delete_solid,
+              color: CupertinoColors.destructiveRed,
+              size: 28,
+            ),
+            color: Color(0xff054961),
+            onPressed: () {
+              // TODO create confirm dialog for ios
+              TaskManager.deleteTask(task.taskId);
+              setState(() {
+                
+              });
             },
           ),
         ],
@@ -227,20 +339,16 @@ class TasksCompletedWidget extends State<TasksCompletedState>
   }
 
 
-  @override
-  Widget build(BuildContext context)
+  Widget getScaffold()
   {
-    screenWidth = MediaQuery.of(context).size.width;
-    screenHeight = MediaQuery.of(context).size.height;
-    int taskLenght = TaskManager.completedTaskLenght;
-
+    if(Platform.isAndroid)
+    {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Completed tasks"),
-      ),
-      body: ListView(
-        children: createView(),
-        controller: ScrollController(),
+        title: Text(
+          "Completed tasks",
+          style: TextStyle(fontSize: 24),
+        ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -250,17 +358,127 @@ class TasksCompletedWidget extends State<TasksCompletedState>
         ),
         width: screenWidth * 0.6,
         height: 45,
-        child: RaisedButton(
-          onPressed: taskLenght > 0 ? deleteAll : null,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Text(taskLenght > 0 ? "Delete all" : "Nothing to delete",style: TextStyle(fontSize: 28,color: taskLenght > 0 ? Colors.redAccent : Colors.white),)
-            ],
-          ),
-        )
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            FlatButton(
+              onPressed: (){},
+              child: Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+            FlatButton(
+              onPressed: (){},
+              child: Icon(
+                FontAwesomeIcons.plus,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: ListView(
+        children: createViewAndroid(),
+        controller: ScrollController(),
       ),
       backgroundColor: Theme.of(context).backgroundColor,
     );
+    }
+    else if(Platform.isIOS)
+    {
+      return CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          trailing: GestureDetector(
+            onTap: showSettings,
+            child: Icon(CupertinoIcons.settings,size: 38, color: CupertinoColors.white,)
+          ),
+          middle: Text("Completed tasks",style: TextStyle(fontSize: 24,color: CupertinoColors.white)),
+          leading: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Icon(CupertinoIcons.back,size: 38,color: CupertinoColors.white,),
+          ),
+          padding: EdgeInsetsDirectional.only(bottom: 5),
+          automaticallyImplyLeading: true,
+          automaticallyImplyMiddle: true,
+          transitionBetweenRoutes: true,
+          backgroundColor: CupertinoTheme.of(context).primaryColor,
+        ),
+        child: ListView(
+          children: createViewIOS(),
+          controller: ScrollController(),
+        ),
+        backgroundColor: Colors.blueGrey,
+      );
+    }
+
+    return Container(child: Center(child: Text("Platform not yet supported"),),);
+  }
+
+    /// Opens settings
+  void showSettings() async{
+    if(Platform.isAndroid)
+    {
+      /// TODO android?
+    }
+    else if (Platform.isIOS)
+    {
+      await showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context)
+        {
+          return CupertinoActionSheet(
+            title: Text("App settings"), 
+            actions: <Widget>[
+              CupertinoButton(
+                onPressed: (){
+
+                  var currentList = TaskManager.completedTask;
+
+                  for(var i = 0; i < currentList.length; i++)
+                  {
+                    TaskManager.flipTaskStatus(currentList[i].taskId);
+                  }
+                  setState(() {});
+                  Navigator.of(context).pop();
+                },
+                child: Text("Restore all task's",style: TextStyle(fontSize: 22),),
+              ),
+              CupertinoButton(
+                onPressed: () async{
+                  // Temp fix, need to universal ui or seperarte ui for deleting all task
+                  var currentList = TaskManager.completedTask;
+
+                  for(var i = 0; i < currentList.length; i++)
+                  {
+                    TaskManager.deleteTask(currentList[i].taskId);
+                  }
+                  setState(() {
+                    
+                  });
+                  Navigator.of(context).pop();
+                },
+                child: Text("Delete all task's",style: TextStyle(fontSize: 22,color: CupertinoColors.destructiveRed),),
+              )
+            ],
+            cancelButton: CupertinoButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancel"),
+            ), 
+          );
+        }
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context)
+  {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+
+    return getScaffold();
   }
 }
