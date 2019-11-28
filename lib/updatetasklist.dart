@@ -1,6 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'models/models.dart';
 import 'utils/taskmanager.dart' as TaskManager;
@@ -38,7 +40,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
   Color taskColor;
   bool isEnabled = false;
 
-  final hightLight = Colors.yellowAccent;
+  final hightLight = Colors.yellow[50];
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
@@ -178,9 +180,8 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
 
   void editColors() async
   {
-      await showDialog(
+      await showCupertinoDialog(
       context: context,
-      barrierDismissible: true,
       builder: (BuildContext context)
       {
         return ColorEdit();
@@ -192,30 +193,21 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
   void addNewColor() async {
     var color = settings.taskHeaderColor;
 
-    await showDialog<void>(
+    await showCupertinoDialog<void>(
         context: context,
-        barrierDismissible: false,
         builder: (BuildContext context) {
-          return AlertDialog(
+          return CupertinoAlertDialog(
             title: Center(child: Text("Pick a color",style: TextStyle(fontSize: 24,color: Colors.white),),),
-            backgroundColor: Theme.of(context).backgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)
-            ),
             content: SingleChildScrollView(
               child: ColorPicker(
-                onColorChanged: (newColor) {
+                onChanged: (newColor) {
                   color = newColor;
                 },
-                pickerColor: color,
-                enableAlpha: true,
-                enableLabel: true,
-                pickerAreaHeightPercent: 0.8,
-                paletteType: PaletteType.hsl,
+                color: color,
               ),
             ),
             actions: <Widget>[
-              RaisedButton(
+              CupertinoButton(
                 onPressed: () => Navigator.of(context).pop(),
                 color: Colors.red,
                 child: Text(
@@ -223,7 +215,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                   style: TextStyle(color: Colors.white, fontSize: 24),
                 ),
               ),
-              RaisedButton(
+              CupertinoButton(
                 onPressed: () {
                   settings.addColor(color);
                   FileSys.saveSettings();
@@ -248,9 +240,10 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     for (var i = 0; i < backgroundColors.length; i++) {
       colors.add(Container(
         child: Padding(
-          child: RaisedButton(
+          child: CupertinoButton(
             onPressed: () => setColor(i),
             color: backgroundColors[i],
+            child: Text(""), // a child is required.... -.-
           ),
           padding: EdgeInsets.only(left: 5, right: 5),
         ),
@@ -263,53 +256,44 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     }
 
     /// max 12 colors
-    if(backgroundColors.length != 12)
-    {
-      colors.add(RaisedButton(
-        onPressed: addNewColor,
-        color: Theme.of(context).buttonColor,
-        child: Icon(
-          FontAwesomeIcons.plusCircle,
-          size: 24,
-          color: Colors.white,
-        ),
-      ));
-    }
+    // if(backgroundColors.length != 12)
+    // {
+    //   colors.add(RaisedButton(
+    //     onPressed: (){},
+    //     color: CupertinoColors.white,
+    //     child: Icon(
+    //       FontAwesomeIcons.plusCircle,
+    //       size: 24,
+    //       color: Colors.green,
+    //     ),
+    //   ));
+    // }
 
-    colors.add(RaisedButton(
-      onPressed: editColors,
-      child: Icon(Icons.settings,size: 28,color: Colors.white,),
-    ));
+    // colors.add(RaisedButton(
+    //   onPressed: editColors,
+    //   child: Icon(Icons.settings,size: 28,color: Colors.white,),
+    // ));
     return colors;
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "${widget.taskId == "null" ? "Add task" : "Edit: ${titleController.text}"}",
-          style: TextStyle(fontSize: 24),
-        ),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        leading: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Icon(
+              CupertinoIcons.back,
+              size: 38,
+              color: CupertinoColors.white,
+            )),
+        middle: Text(widget.taskId == "null" ? "Add Task" : "Edit Task",style: TextStyle(fontSize: 24, color: CupertinoColors.white)),
+        padding: EdgeInsetsDirectional.only(bottom: 5),
+        automaticallyImplyLeading: true,
+        automaticallyImplyMiddle: true,
+        transitionBetweenRoutes: true,
+        backgroundColor: CupertinoTheme.of(context).primaryColor,
       ),
-      bottomNavigationBar: MaterialButton(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15), topRight: Radius.circular(15))),
-        child: Text(
-          "${(isEnabled ? "Save" : "Waiting...")}",
-          style: TextStyle(fontSize: 28, color: Colors.white),
-        ),
-        color: Theme.of(context).buttonColor,
-        onPressed: isEnabled
-            ? () {
-                if (submitTask()) {
-                  Navigator.pop(context);
-                }
-              }
-            : null,
-        height: 64,
-      ),
-      body: GestureDetector(
+      child: GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(new FocusNode());
         },
@@ -319,14 +303,19 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
               Column(children: <Widget>[
                 Padding(
                   padding: EdgeInsets.only(bottom: 10),
-                  child: TextField(
+                  child: CupertinoTextField(
                     controller: titleController,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white)),
-                        labelText: "Task title",
-                        labelStyle: TextStyle(color: Colors.white)),
                     style: TextStyle(fontSize: 22, color: Colors.white),
+                    textAlign: TextAlign.center,
+                    cursorColor: CupertinoColors.white,
+                    placeholder: "Task Title",
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Color(0xff054961),
+                        width: 3
+                      ),
+                      borderRadius: BorderRadius.circular(10)
+                    ),
                   ),
                 ),
                 Text(
@@ -340,16 +329,20 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
               Column(
                 children: <Widget>[
                   Padding(
-                    child: TextField(
+                    child: CupertinoTextField(
                       textCapitalization: TextCapitalization.sentences,
                       controller: descriptionController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: "Description",
-                        hintStyle: TextStyle(color: Colors.white),
-                      ),
                       maxLines: 10,
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+                      style: TextStyle(fontSize: 22, color: Colors.white),
+                       cursorColor: CupertinoColors.white,
+                    placeholder: "Task Description",
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Color(0xff054961),
+                        width: 3
+                      ),
+                      borderRadius: BorderRadius.circular(10)
+                    )
                     ),
                     padding: EdgeInsets.only(top: 20, bottom: 10),
                   ),
@@ -362,21 +355,33 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
               ),
               Padding(
                 child: GridView.count(
-                  crossAxisCount: 4,
+                  crossAxisCount: 3,
                   children: createColorGrid(),
                   crossAxisSpacing: 5,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 3,
+                  childAspectRatio: 2,
                   shrinkWrap: true,
                 ),
-                padding: EdgeInsets.only(top: 25, bottom: 45),
+                padding: EdgeInsets.only(top: 45),
               ),
+              Padding(
+                padding: EdgeInsets.only(top: 100),
+                child: CupertinoButton(
+                  color: Color(0xff054961),
+                  child: Text(widget.taskId == "null" ? "Save Task" : "Update Task",style: TextStyle(fontSize: 22,color: Colors.white70),),
+                  onPressed: isEnabled ? (){
+                    submitTask();
+                    Navigator.of(context).pop();
+                  } : null,
+                ),
+              )
             ],
           ),
           padding: EdgeInsets.only(top: 15, left: 10, right: 10),
         ),
       ),
-      backgroundColor: Theme.of(context).backgroundColor,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Colors.blueGrey,
     );
   }
 }

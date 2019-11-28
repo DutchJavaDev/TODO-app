@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../utils/filesys.dart' as FileSys;
 
@@ -69,27 +70,37 @@ class ColorEditWidget extends State<ColorEditState>
   }
 
   Widget build(BuildContext context) {
-    return AlertDialog(
-          title: Center(child: Text("Edit Colors",style: TextStyle(fontSize: 24,color: Colors.white),),),
-          backgroundColor: Theme.of(context).backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)
-          ),
-          content: SingleChildScrollView(
+    var size = MediaQuery.of(context).size;
+
+    return CupertinoPopupSurface(
+          child: Container(
+            width: size.width * 5,
+            height: size.height * 6,
+            color: CupertinoColors.inactiveGray,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Center(child: Text("Edit Colors",style: TextStyle(fontSize: 24,color: Colors.white),),)
+                  ],
+                ),
+                SingleChildScrollView(
             child: Column(
               children: createEditView(),
             ),
           ),
-          actions: <Widget>[
-            Container(
-              width: MediaQuery.of(context).size.width*0.7,
-              child: RaisedButton(
-                color: Colors.red,
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text("Close",style: TextStyle(color: Colors.white, fontSize: 24),),
-              ),
+          CupertinoButton(
+            onPressed: (){
+              Navigator.of(context).pop();
+            },
+            color: CupertinoColors.destructiveRed,
+            child: Text("Close"),
             )
-          ],
-        );;
+              ],
+            ),
+          )
+        );
   }
 }

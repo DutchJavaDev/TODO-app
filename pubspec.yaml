@@ -22,7 +22,7 @@ dependencies:
   uuid: 2.0.1
   font_awesome_flutter: any
   path_provider: ^1.4.0
-  flutter_colorpicker: any
+  flutter_hsvcolor_picker: ^0.0.1
 
 
   # The following adds the Cupertino Icons font to your application.

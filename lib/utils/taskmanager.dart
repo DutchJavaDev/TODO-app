@@ -11,7 +11,7 @@ Color _defaultColor;
 
 /// Gets called when the app starts, loads all the saved tasks
 Future<void> initManager() async {
-  _defaultColor = FileSys.getSettingsModel.taskHeaderColor;
+  _defaultColor = FileSys.getSettingsModel.getBackgroundColors[0];
   var items = await FileSys.getTaskList();
   items.forEach((i) => _tasks.add(TaskModel.fromMappedJson(i)));
 }
@@ -66,6 +66,13 @@ void deleteTask(String id) {
 /// Delete's all the tasks
 void deleteAllDoneTasks() {
   _tasks.removeWhere((i) => i.taskDone);
+  _updateTaskList();
+}
+
+/// Delete's all active tasks
+void deleteActiveTasks()
+{
+  _tasks.removeWhere((i) => i.taskDone == false);
   _updateTaskList();
 }
 
