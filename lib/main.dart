@@ -25,10 +25,11 @@ class MyApp extends StatelessWidget {
       return CupertinoApp(
         title: 'TODO list',
         theme: CupertinoThemeData(
-            primaryColor: Color(0xff054961),
-            scaffoldBackgroundColor: Color(0xff054961),
-            textTheme:CupertinoTextThemeData(primaryColor: CupertinoColors.white),
-            ),
+          primaryColor: Color(0xff054961),
+          scaffoldBackgroundColor: Color(0xff054961),
+          textTheme:
+              CupertinoTextThemeData(primaryColor: CupertinoColors.white),
+        ),
         home: MyHomePage(title: 'TODO'),
       );
     } else if (Platform.isAndroid) {
@@ -59,10 +60,25 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   double screenWidth;
   double screenHeight;
+  CupertinoTabController _cupertinoTabController;
 
   @override
   void initState() {
     super.initState();
+    _cupertinoTabController = CupertinoTabController();
+
+    _cupertinoTabController.addListener((){
+      setState(() {
+        
+      });
+    });
+  }
+
+  @override
+  void dispose()
+  {
+    super.dispose();
+    _cupertinoTabController.dispose();
   }
 
   /// Opens the updateview with an id of null
@@ -113,56 +129,64 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Opens settings
   void showSettings() async {
-      await showCupertinoModalPopup(
-          context: context,
-          builder: (BuildContext context) {
-            return CupertinoActionSheet(
-              title: Text("App settings", style: TextStyle(fontSize: 28)),
-              actions: <Widget>[
-                CupertinoButton(
-                  onPressed: () async {
-                    await Navigator.push(context, animatedUpdateRoute());
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Add task", style: TextStyle(fontSize: 22)),
-                ),
-                CupertinoButton(
-                  onPressed: () async {
-                    await Navigator.push(context, animatedCompletedTaskRoute());
-                    Navigator.pop(context);
-                  },
-                  child: Text("View completd task's",
-                      style: TextStyle(fontSize: 22)),
-                ),
-                CupertinoButton(
-                  onPressed: () {},
-                  child: Text("Reset app",
-                      style: TextStyle(
-                          fontSize: 22, color: CupertinoColors.destructiveRed)),
-                ),
-                CupertinoButton(
-                  onPressed: () {
-                    setState(() {
-                      TaskManager.deleteActiveTasks();
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Delete active task's",
-                      style: TextStyle(
-                          fontSize: 22, color: CupertinoColors.destructiveRed)),
-                )
-              ],
-              cancelButton: CupertinoButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text("Cancel",style: TextStyle(fontSize: 22),),
+    await showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) {
+          return CupertinoActionSheet(
+            title: Text("App settings", style: TextStyle(fontSize: 28)),
+            actions: <Widget>[
+              CupertinoButton(
+                onPressed: () async {
+                  await Navigator.push(context, animatedUpdateRoute());
+                  Navigator.of(context).pop();
+                },
+                child: Text("Add task", style: TextStyle(fontSize: 22)),
               ),
-            );
-          });
+              CupertinoButton(
+                onPressed: () async {
+                  await Navigator.push(context, animatedCompletedTaskRoute());
+                  Navigator.pop(context);
+                },
+                child: Text("View completd task's",
+                    style: TextStyle(fontSize: 22)),
+              ),
+              CupertinoButton(
+                onPressed: () {},
+                child: Text("Reset app",
+                    style: TextStyle(
+                        fontSize: 22, color: CupertinoColors.destructiveRed)),
+              ),
+              CupertinoButton(
+                onPressed: () {
+                  setState(() {
+                    TaskManager.deleteActiveTasks();
+                  });
+                  Navigator.of(context).pop();
+                },
+                child: Text("Delete active task's",
+                    style: TextStyle(
+                        fontSize: 22, color: CupertinoColors.destructiveRed)),
+              )
+            ],
+            cancelButton: CupertinoButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                "Cancel",
+                style: TextStyle(fontSize: 22),
+              ),
+            ),
+          );
+        });
   }
 
   /// Opens the updateview with the given task id
-  void editTask(String id) {
-    Navigator.push(context, animatedUpdateRoute(id: id));
+  void editTask(String id) async{
+    //Navigator.push(context, animatedUpdateRoute(id: id));
+    await showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) {
+          return UpdateTaskList(taskId: id,);
+        });
   }
 
   /// Updates the given task to done
@@ -274,29 +298,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return items;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    screenWidth = MediaQuery.of(context).size.width;
-    screenHeight = MediaQuery.of(context).size.height;
-
+  Widget _home() {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        leading: GestureDetector(
-            onTap: showSettings,
-            child: Icon(
-              CupertinoIcons.settings,
-              size: 40,
-              color: CupertinoColors.white,
-            )),
         middle: Text(widget.title,
             style: TextStyle(fontSize: 24, color: CupertinoColors.white)),
-        trailing: GestureDetector(
-            onTap: addTask,
-            child: Icon(
-              Icons.add,
-              size: 40,
-              color: CupertinoColors.white,
-            )),
         padding: EdgeInsetsDirectional.only(bottom: 5),
         automaticallyImplyLeading: true,
         automaticallyImplyMiddle: true,
@@ -308,6 +314,58 @@ class _MyHomePageState extends State<MyHomePage> {
         controller: ScrollController(),
       ),
       backgroundColor: Colors.blueGrey,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+
+    return CupertinoTabScaffold(
+      controller: _cupertinoTabController,
+      tabBar: CupertinoTabBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(
+              FontAwesomeIcons.checkDouble,
+              size: 36,
+            ),
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(
+            FontAwesomeIcons.tasks,
+            size: 38,
+          )),
+          BottomNavigationBarItem(
+              icon: Icon(
+            FontAwesomeIcons.plus,
+            size: 30,
+          ))
+        ],
+        backgroundColor: CupertinoTheme.of(context).primaryColor,
+        currentIndex: 1,
+        activeColor: CupertinoColors.activeGreen,
+        inactiveColor: CupertinoColors.white,
+      ),
+      tabBuilder: (BuildContext context, int index) {
+        switch (index) {
+          case 0:
+            return CupertinoPageScaffold(
+              child: TasksCompleted(),
+            );
+
+          case 1:
+            return _home();
+
+          case 2:
+            return UpdateTaskList();
+            
+
+          default:
+            return _home();
+        }
+      },
     );
   }
 }

@@ -281,23 +281,8 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
     
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        trailing: GestureDetector(
-            onTap: showSettings,
-            child: Icon(
-              CupertinoIcons.settings,
-              size: 38,
-              color: CupertinoColors.white,
-            )),
         middle: Text("Completed tasks",
             style: TextStyle(fontSize: 24, color: CupertinoColors.white)),
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Icon(
-            CupertinoIcons.back,
-            size: 38,
-            color: CupertinoColors.white,
-          ),
-        ),
         padding: EdgeInsetsDirectional.only(bottom: 5),
         automaticallyImplyLeading: true,
         automaticallyImplyMiddle: true,

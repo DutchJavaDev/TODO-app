@@ -32,7 +32,6 @@ class UpdateTaskListStateFull extends StatefulWidget {
 }
 
 class UpdateTaskListState extends State<UpdateTaskListStateFull> {
-
   TaskModel model;
   SettingsModel settings;
   String titleError;
@@ -47,6 +46,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
   @override
   void initState() {
     super.initState();
+
     /// Listen for changes in the input
     titleController.addListener(titleListener);
     descriptionController.addListener(descriptionListener);
@@ -60,8 +60,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     } else {
       titleController.text = "";
       descriptionController.text = "";
-      if(settings.getBackgroundColors.length == 0)
-      {
+      if (settings.getBackgroundColors.length == 0) {
         taskColor = Colors.grey;
       }
       {
@@ -130,47 +129,44 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     }
   }
 
-  List<Widget> createEditView()
-  {
+  List<Widget> createEditView() {
     var items = List<Widget>();
 
-    for(var color in settings.getBackgroundColors)
-    {
+    for (var color in settings.getBackgroundColors) {
       var row = Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Padding(
             padding: EdgeInsets.only(right: 8),
             child: Container(
-            width: MediaQuery.of(context).size.width*0.3,
-            height: 38,
-            color: color
-          ),
+                width: MediaQuery.of(context).size.width * 0.3,
+                height: 38,
+                color: color),
           ),
           RaisedButton(
-            onPressed: (){
+            onPressed: () {
               // Bug, cant refresh the alertdialog
               settings.removeColor(color);
-              if(taskColor == color)
-              {
+              if (taskColor == color) {
                 taskColor = settings.getBackgroundColors.first;
               }
-              setState(() {
-                
-              });
+              setState(() {});
               // Temp fix
               Navigator.of(context).pop();
 
               // To fix this i need to put the alertdialog in its own statefullwidget so i can refresh it
               // when i delete a color
             },
-            child: Text("Delete",style: TextStyle(color: Colors.white,fontSize: 20),),
+            child: Text(
+              "Delete",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
           )
         ],
       );
 
       items.add(Padding(
-        padding: EdgeInsets.only(top: 2.5,bottom: 5),
+        padding: EdgeInsets.only(top: 2.5, bottom: 5),
         child: row,
       ));
     }
@@ -178,15 +174,12 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     return items;
   }
 
-  void editColors() async
-  {
-      await showCupertinoDialog(
-      context: context,
-      builder: (BuildContext context)
-      {
-        return ColorEdit();
-      }
-    );
+  void editColors() async {
+    await showCupertinoDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return ColorEdit();
+        });
     setState(() {});
   }
 
@@ -197,7 +190,12 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
         context: context,
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: Center(child: Text("Pick a color",style: TextStyle(fontSize: 24,color: Colors.white),),),
+            title: Center(
+              child: Text(
+                "Pick a color",
+                style: TextStyle(fontSize: 24, color: Colors.white),
+              ),
+            ),
             content: SingleChildScrollView(
               child: ColorPicker(
                 onChanged: (newColor) {
@@ -279,19 +277,12 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        leading: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Icon(
-              CupertinoIcons.back,
-              size: 38,
-              color: CupertinoColors.white,
-            )),
-        middle: Text(widget.taskId == "null" ? "Add Task" : "Edit Task",style: TextStyle(fontSize: 24, color: CupertinoColors.white)),
+        leading: Text(""),
+        middle: Text(widget.taskId == "null" ? "Add Task" : "Edit Task",
+            style: TextStyle(fontSize: 24, color: CupertinoColors.white)),
         padding: EdgeInsetsDirectional.only(bottom: 5),
-        automaticallyImplyLeading: true,
-        automaticallyImplyMiddle: true,
-        transitionBetweenRoutes: true,
         backgroundColor: CupertinoTheme.of(context).primaryColor,
+        previousPageTitle: "TODO",
       ),
       child: GestureDetector(
         onTap: () {
@@ -310,12 +301,8 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                     cursorColor: CupertinoColors.white,
                     placeholder: "Task Title",
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Color(0xff054961),
-                        width: 3
-                      ),
-                      borderRadius: BorderRadius.circular(10)
-                    ),
+                        border: Border.all(color: Color(0xff054961), width: 3),
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
                 Text(
@@ -330,20 +317,16 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 children: <Widget>[
                   Padding(
                     child: CupertinoTextField(
-                      textCapitalization: TextCapitalization.sentences,
-                      controller: descriptionController,
-                      maxLines: 10,
-                      style: TextStyle(fontSize: 22, color: Colors.white),
-                       cursorColor: CupertinoColors.white,
-                    placeholder: "Task Description",
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Color(0xff054961),
-                        width: 3
-                      ),
-                      borderRadius: BorderRadius.circular(10)
-                    )
-                    ),
+                        textCapitalization: TextCapitalization.sentences,
+                        controller: descriptionController,
+                        maxLines: 10,
+                        style: TextStyle(fontSize: 22, color: Colors.white),
+                        cursorColor: CupertinoColors.white,
+                        placeholder: "Task Description",
+                        decoration: BoxDecoration(
+                            border:
+                                Border.all(color: Color(0xff054961), width: 3),
+                            borderRadius: BorderRadius.circular(10))),
                     padding: EdgeInsets.only(top: 20, bottom: 10),
                   ),
                   Text(descriptionError,
@@ -365,14 +348,18 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 padding: EdgeInsets.only(top: 45),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 100),
+                padding: EdgeInsets.only(top: 55),
                 child: CupertinoButton(
                   color: Color(0xff054961),
-                  child: Text(widget.taskId == "null" ? "Save Task" : "Update Task",style: TextStyle(fontSize: 22,color: Colors.white70),),
-                  onPressed: isEnabled ? (){
-                    submitTask();
-                    Navigator.of(context).pop();
-                  } : null,
+                  child: Text(
+                    widget.taskId == "null" ? "Save Task" : "Update Task",
+                    style: TextStyle(fontSize: 22, color: Colors.white70),
+                  ),
+                  onPressed: isEnabled
+                      ? () {
+                          submitTask();
+                        }
+                      : null,
                 ),
               )
             ],
