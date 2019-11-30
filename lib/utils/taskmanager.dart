@@ -76,6 +76,12 @@ void deleteActiveTasks()
   _updateTaskList();
 }
 
+void deleteAll()
+{
+  _tasks.clear();
+  _updateTaskList();
+}
+
 /// Returns the number of tasks that are completed
 int get completedTaskLenght => _tasks.where((i) => i.taskDone).length;
 

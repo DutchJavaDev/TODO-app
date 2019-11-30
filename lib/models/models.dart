@@ -3,15 +3,28 @@ import 'dart:ui';
 
 class SettingsModel
 {
-  int colorIndex;
   List<Color> _backgroundColors;
+  int _headerFontSize;
+  int _descriptionFontSize;
+
+  int colorIndex;
   Color taskHeaderColor;
 
   List<Color> get getBackgroundColors => _backgroundColors;
+  double get getHeaderFontSize => _headerFontSize.toDouble();
+  double get getDescriptionFontSize => _descriptionFontSize.toDouble();
   
+  SettingsModel(this.colorIndex,this._backgroundColors,this.taskHeaderColor,this._headerFontSize,this._descriptionFontSize);
 
-  SettingsModel(this.colorIndex,this._backgroundColors,this.taskHeaderColor);
+  void setHeaderFontSize(double newValue)
+  {
+    _headerFontSize = newValue.round();
+  }
 
+  void setDescriptionFontSize(double newValue)
+  {
+    _descriptionFontSize = newValue.round();
+  }
 
   void removeColor(Color color)
   {
@@ -22,17 +35,21 @@ class SettingsModel
   {
     _backgroundColors.add(color);
   }
-
-
+  
   SettingsModel.fromMappedJson(Map<String,dynamic> json) : 
     colorIndex = json["colorIndex"],
     _backgroundColors = _decodeColors(json["backgroundColors"]),
-    taskHeaderColor = Color(int.parse(json["taskHeaderColor"].toString()));
+    taskHeaderColor = Color(int.parse(json["taskHeaderColor"].toString())),
+    _headerFontSize = json["headerFontSize"],
+    _descriptionFontSize = json["descriptionFontSize"]
+    ;
 
   Map<String,dynamic> toJson() => {
     "colorIndex":colorIndex,
     "backgroundColors": _encodeColors(_backgroundColors),
-    "taskHeaderColor": taskHeaderColor.value
+    "taskHeaderColor": taskHeaderColor.value,
+    "headerFontSize": _headerFontSize,
+    "descriptionFontSize": _descriptionFontSize
   };
 
   static List<Color> _decodeColors(dynamic colors)

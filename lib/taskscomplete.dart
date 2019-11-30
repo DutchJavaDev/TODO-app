@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'utils/taskmanager.dart' as TaskManager;
-import 'utils/filesys.dart' as FileSys;
+import 'widgets/taskwidget.dart';
 
 class TasksCompleted extends StatelessWidget {
   @override
@@ -27,187 +25,74 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
     super.initState();
   }
 
-  void deleteAll() async {
-    await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: Theme.of(context).backgroundColor,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12))),
-            content: Container(
-              width: screenWidth,
-              height: 125,
-              color: Colors.transparent,
-              child: Column(
-                children: <Widget>[
-                  Text("Are you sure you want to delete all the tasks?"),
-                  Padding(
-                    padding: EdgeInsets.only(top: 35),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        RaisedButton(
-                          onPressed: () {
-                            setState(() {
-                              TaskManager.deleteAllDoneTasks();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Text("Yes"),
-                          color: Colors.greenAccent,
-                        ),
-                        RaisedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text("No"),
-                          color: Colors.redAccent,
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
-  void deleteTask(String id) async {
+  void _deleteTaskDialog(String id) async {
     var task = TaskManager.getTaskById(id);
-    await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: Theme.of(context).backgroundColor,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12))),
-            content: Container(
-              width: screenWidth,
-              height: 125,
-              color: Colors.transparent,
-              child: Column(
-                children: <Widget>[
-                  Text(
-                      "Are you sure you want to delete item '${task.taskTitle}'?"),
-                  Padding(
-                    padding: EdgeInsets.only(top: 35),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        RaisedButton(
-                          onPressed: () {
-                            setState(() {
-                              TaskManager.deleteTask(task.taskId);
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Text("Yes"),
-                          color: Colors.greenAccent,
-                        ),
-                        RaisedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text("No"),
-                          color: Colors.redAccent,
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
+
+    await showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context)
+      {
+        return CupertinoAlertDialog(
+
+          title: Text("Delete task ${task.taskTitle}?", style: TextStyle(color: Colors.red),),
+          content: Container(
+            child: Padding(
+              padding: EdgeInsets.only(top: 15),
+              child: Text("Are you sure you want to delete this task?", style: TextStyle(fontSize: 18),),
             ),
-          );
-        });
+          ),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: Text("Yes delete", style: TextStyle(fontWeight: FontWeight.bold),),
+              isDestructiveAction: true,
+              onPressed: (){
+                TaskManager.deleteTask(id);
+                Navigator.of(context).pop();
+              },
+            ),
+            CupertinoDialogAction(
+              child: Text("No keep"),
+              isDefaultAction: true,
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      }
+    );
   }
 
   List<Widget> createView() {
     var items = List<Widget>();
-    int counter = 0;
+
     for (var task in TaskManager.completedTask) {
-      var headerText = Text("${task.taskTitle}",
-          style: TextStyle(
-              fontSize: 28,
-              color: Colors.black54,
-              fontWeight: FontWeight.bold));
-      var description = Text("${task.taskDescription}",
-          style: TextStyle(fontSize: 20, color: Colors.black54));
-
-      var headerDecoration = BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: FileSys.getSettingsModel.taskHeaderColor);
-      var header = Container(
-        child: Center(
-          child: headerText,
-        ),
-        width: screenWidth,
-        height: 50,
-        decoration: headerDecoration,
-      );
-
-      var buttonBar = Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          CupertinoButton(
-            child: Icon(
-              Icons.replay,
-              color: CupertinoColors.activeGreen,
-              size: 28,
-            ),
-            onPressed: () {
-              TaskManager.flipTaskStatus(task.taskId);
-              setState(() {});
-            },
-            color: Color(0xff054961),
+      items.add(TaskView(
+        task: task,
+        leftAction: (taskId){
+          TaskManager.flipTaskStatus(taskId);
+          setState(() {
+            
+          });
+        },
+        leftActionIcon: Icon(
+          FontAwesomeIcons.redo,
+          color: Colors.greenAccent,
+          size: 24,
           ),
-          CupertinoButton(
-            child: Icon(
-              CupertinoIcons.delete_solid,
-              color: CupertinoColors.destructiveRed,
-              size: 28,
-            ),
-            color: Color(0xff054961),
-            onPressed: () {
-              // TODO create confirm dialog for ios
-              TaskManager.deleteTask(task.taskId);
-              setState(() {});
-            },
-          ),
-        ],
-      );
 
-      var column = Column(
-        children: <Widget>[
-          Padding(
-            child: header,
-            padding: EdgeInsets.only(bottom: 0, top: 0),
+        rightAction: (taskId){
+          _deleteTaskDialog(taskId);
+          setState(() {
+            
+          });
+        },
+        rightActionIcon: Icon(
+          FontAwesomeIcons.trash, 
+          color: CupertinoColors.destructiveRed,
+          size: 24,
           ),
-          Padding(
-            child: description,
-            padding: EdgeInsets.only(bottom: 20, left: 25, right: 25, top: 35),
-          ),
-          Padding(
-            child: buttonBar,
-            padding: EdgeInsets.only(bottom: 15, top: 5),
-          )
-        ],
-      );
-
-      var itemDecoration = BoxDecoration(
-          borderRadius: BorderRadius.circular(12), color: task.taskColor);
-      var container = Container(
-        child: column,
-        width: screenWidth,
-        decoration: itemDecoration,
-      );
-
-      items.add(Padding(
-        child: container,
-        padding: EdgeInsets.only(
-            bottom: 5, top: counter == 0 ? 5 : 0, left: 5, right: 5),
       ));
-
-      counter++;
     }
 
     if (items.length == 0) {
@@ -223,55 +108,6 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
       ));
     }
     return items;
-  }
-
-  /// Opens settings
-  void showSettings() async {
-    await showCupertinoModalPopup(
-        context: context,
-        builder: (BuildContext context) {
-          return CupertinoActionSheet(
-            title: Text("App settings"),
-            actions: <Widget>[
-              CupertinoButton(
-                onPressed: () {
-                  var currentList = TaskManager.completedTask;
-
-                  for (var i = 0; i < currentList.length; i++) {
-                    TaskManager.flipTaskStatus(currentList[i].taskId);
-                  }
-                  setState(() {});
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  "Restore all task's",
-                  style: TextStyle(fontSize: 22),
-                ),
-              ),
-              CupertinoButton(
-                onPressed: () async {
-                  // Temp fix, need to universal ui or seperarte ui for deleting all task
-                  var currentList = TaskManager.completedTask;
-
-                  for (var i = 0; i < currentList.length; i++) {
-                    TaskManager.deleteTask(currentList[i].taskId);
-                  }
-                  setState(() {});
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  "Delete all task's",
-                  style: TextStyle(
-                      fontSize: 22, color: CupertinoColors.destructiveRed),
-                ),
-              )
-            ],
-            cancelButton: CupertinoButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-          );
-        });
   }
 
   @override

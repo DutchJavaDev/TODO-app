@@ -97,7 +97,7 @@ Future<Map<String, dynamic>> _getSettings() async {
       Color(0xff0288D1),
       Color(0xffC2185B),
       ],
-      Color(0xffbbdefb));
+      Color(0xffbbdefb),20,34);
     saveSettings();
     return await _getMap(_settings);
   }

@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'models/models.dart';
 import 'utils/taskmanager.dart' as TaskManager;
 import 'utils/filesys.dart' as FileSys;
@@ -282,7 +279,6 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
             style: TextStyle(fontSize: 24, color: CupertinoColors.white)),
         padding: EdgeInsetsDirectional.only(bottom: 5),
         backgroundColor: CupertinoTheme.of(context).primaryColor,
-        previousPageTitle: "TODO",
       ),
       child: GestureDetector(
         onTap: () {
@@ -348,20 +344,30 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 padding: EdgeInsets.only(top: 45),
               ),
               Padding(
-                padding: EdgeInsets.only(top: 55),
+                padding: EdgeInsets.only(top: 45, bottom: 15),
                 child: CupertinoButton(
                   color: Color(0xff054961),
                   child: Text(
                     widget.taskId == "null" ? "Save Task" : "Update Task",
-                    style: TextStyle(fontSize: 22, color: Colors.white70),
+                    style: TextStyle(fontSize: 22, color: Colors.white),
                   ),
                   onPressed: isEnabled
                       ? () {
                           submitTask();
+                          Navigator.of(context).pop();
                         }
                       : null,
                 ),
-              )
+              ),
+              CupertinoButton(
+                  color: Color(0xff054961),
+                  child: Text(
+                    "Close",
+                    style: TextStyle(fontSize: 22, color: CupertinoColors.white),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  })
             ],
           ),
           padding: EdgeInsets.only(top: 15, left: 10, right: 10),
