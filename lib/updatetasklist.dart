@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'models/models.dart';
 import 'utils/taskmanager.dart' as TaskManager;
 import 'utils/filesys.dart' as FileSys;
@@ -178,54 +177,6 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
           return ColorEdit();
         });
     setState(() {});
-  }
-
-  void addNewColor() async {
-    var color = settings.taskHeaderColor;
-
-    await showCupertinoDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return CupertinoAlertDialog(
-            title: Center(
-              child: Text(
-                "Pick a color",
-                style: TextStyle(fontSize: 24, color: Colors.white),
-              ),
-            ),
-            content: SingleChildScrollView(
-              child: ColorPicker(
-                onChanged: (newColor) {
-                  color = newColor;
-                },
-                color: color,
-              ),
-            ),
-            actions: <Widget>[
-              CupertinoButton(
-                onPressed: () => Navigator.of(context).pop(),
-                color: Colors.red,
-                child: Text(
-                  "Close",
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              ),
-              CupertinoButton(
-                onPressed: () {
-                  settings.addColor(color);
-                  FileSys.saveSettings();
-                  setState(() {
-                    Navigator.of(context).pop();
-                  });
-                },
-                child: Text(
-                  "Add color",
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                ),
-              )
-            ],
-          );
-        });
   }
 
   List<Widget> createColorGrid() {
