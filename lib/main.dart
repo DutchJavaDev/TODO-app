@@ -10,6 +10,8 @@ import 'utils/filesys.dart' as FileSys;
 import 'utils/taskmanager.dart' as TaskManager;
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
   await FileSys.initFileSystem();
   await TaskManager.initManager();
 
