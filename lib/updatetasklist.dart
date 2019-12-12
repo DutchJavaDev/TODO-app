@@ -233,7 +233,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
       ),
       child: GestureDetector(
         onTap: () {
-          FocusScope.of(context).requestFocus(new FocusNode());
+          FocusScope.of(context).requestFocus(FocusNode());
         },
         child: Padding(
           child: ListView(

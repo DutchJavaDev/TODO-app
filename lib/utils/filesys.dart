@@ -4,12 +4,15 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:test_build/models/models.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 String basePath = "";
 String _dirPath = "";
 String _dirName = "TodoAppDocuments";
 String _settings = "appSettings.json";
 String _taskList = "taskList.json";
+String _appType;
+String _baseUrl;
 
 /// All application settings will be stored in here, will be loaded once
 SettingsModel _settingsModel;
@@ -17,9 +20,16 @@ SettingsModel _settingsModel;
 /// Get the current loaded settings model
 SettingsModel get getSettingsModel => _settingsModel;
 
+String get getAppType => _appType;
+String get getBaseUrl => _baseUrl;
+
 /// This will run some checks before the application gets loaded
 /// Checks if all the app files exist if not then they get created
 Future<void> initFileSystem() async {
+
+  var appData = json.decode(await rootBundle.loadString("assets/api/appdata.json"));
+  _baseUrl = appData["base_url"];
+  _appType = appData["appname"];
 
   final appDir = await getApplicationDocumentsDirectory();
   basePath = appDir.path;
@@ -40,6 +50,7 @@ Future<void> initFileSystem() async {
     }
 
   }
+
   _settingsModel = SettingsModel.fromMappedJson(await _getSettings());
 }
 

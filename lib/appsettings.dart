@@ -52,10 +52,38 @@ class AppSettingsState extends State<AppSettingsStateFull> {
     final double taskDescriptionSize =
         FileSys.getSettingsModel.getDescriptionFontSize;
 
-    return ListView(
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(top: 15),
+    final Size size = MediaQuery.of(context).size;
+
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+                           Padding(
+              padding: EdgeInsets.only(top: 8, left: 8, right: 8),
+              child: SizedBox(
+                width: double.infinity,
+                height: size.height * 0.3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 6,right: 6, top: 6, bottom: 6),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Text("WARNING!",style: TextStyle(fontSize: 23, color: Colors.red),),
+                        Text("TODO add warning text here for deleting stuff",textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+           Padding(
+          padding: EdgeInsets.only(top: 14),
           child: Container(
             color: Colors.white,
             child: Row(
@@ -80,7 +108,7 @@ class AppSettingsState extends State<AppSettingsStateFull> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(top: 15),
+          padding: EdgeInsets.only(top: 14),
           child: Container(
             color: Colors.white,
             child: Row(
@@ -105,8 +133,10 @@ class AppSettingsState extends State<AppSettingsStateFull> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(top: 15, left: 6, right: 6),
-          child: CupertinoButton(
+          padding: EdgeInsets.only(top: 14, left: 8, right: 8),
+          child: SizedBox(
+            width: double.infinity,
+            child: CupertinoButton(
             child: Text(
               "Delete all active tasks",
               style: TextStyle(
@@ -126,10 +156,13 @@ class AppSettingsState extends State<AppSettingsStateFull> {
             },
             color: _buttonColor,
           ),
+          ),
         ),
         Padding(
-          padding: EdgeInsets.only(top: 15, left: 6, right: 6),
-          child: CupertinoButton(
+          padding: EdgeInsets.only(top: 14, left: 8, right: 8),
+          child: SizedBox(
+            width: double.infinity,
+            child: CupertinoButton(
             child: Text(
               "Delete all completed tasks",
               style: TextStyle(
@@ -149,10 +182,13 @@ class AppSettingsState extends State<AppSettingsStateFull> {
             },
             color: _buttonColor,
           ),
+          ),
         ),
         Padding(
-          padding: EdgeInsets.only(top: 15, left: 6, right: 6),
-          child: CupertinoButton(
+          padding: EdgeInsets.only(top: 14,left: 8, right: 8),
+          child: SizedBox(
+            width: double.infinity,
+            child: CupertinoButton(
             child: Text(
               "Delete all tasks",
               style: TextStyle(
@@ -172,8 +208,10 @@ class AppSettingsState extends State<AppSettingsStateFull> {
             },
             color: _buttonColor,
           ),
-        )
-      ],
+          ),
+        ),
+        ],
+      ),
     );
   }
 

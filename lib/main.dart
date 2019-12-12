@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:test_build/account.dart';
 import 'package:test_build/appsettings.dart';
 import 'package:test_build/taskscomplete.dart';
 import 'package:test_build/updatetasklist.dart';
@@ -8,11 +9,15 @@ import 'package:test_build/widgets/taskwidget.dart';
 import 'updatetasklist.dart';
 import 'utils/filesys.dart' as FileSys;
 import 'utils/taskmanager.dart' as TaskManager;
+import 'api/apiservice.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   await FileSys.initFileSystem();
+
+  ApiService.initService();
+
   await TaskManager.initManager();
 
   runApp(MyApp());
@@ -140,11 +145,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _updateTaskPopUp() async {
     await showCupertinoModalPopup(
-        context: this.context,
+        context: context,
         builder: (BuildContext context) {
           return UpdateTaskList();
         });
     setState(() {});
+  }
+
+  void _accountPopUp() async
+  {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context)
+      {
+        return AccountPanel();
+      }
+    );
   }
 
   @override
@@ -156,6 +172,13 @@ class _MyHomePageState extends State<MyHomePage> {
       controller: _cupertinoTabController,
       tabBar: CupertinoTabBar(
         items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(
+              FontAwesomeIcons.user,
+              size: 32,
+              )
+          ),
+
           BottomNavigationBarItem(
             icon: Icon(
               Icons.settings,
@@ -182,29 +205,36 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
         backgroundColor: CupertinoTheme.of(context).primaryColor,
-        currentIndex: 1,
+        currentIndex: 2,
         activeColor: CupertinoColors.activeGreen,
         inactiveColor: CupertinoColors.white,
         onTap: (index) {
-          if (index == 3) {
-            _updateTaskPopUp();
-            _cupertinoTabController.index = 2;
+          if(index == 0)
+          {
+            _accountPopUp();
+            _cupertinoTabController.index = 3;
           }
 
-          if (index == 3) {
-            _cupertinoTabController.index = 2;
+          if (index == 4) {
+            _updateTaskPopUp();
+            _cupertinoTabController.index = 3;
+          }
+
+          if (index == 4) {
+            _cupertinoTabController.index = 3;
           }
         },
       ),
       tabBuilder: (BuildContext context, int index) {
         switch (index) {
-          case 0:
-            return AppSettings();
 
           case 1:
-            return TasksCompleted();
+            return AppSettings();
 
           case 2:
+            return TasksCompleted();
+
+          case 3:
             return _home();
 
           default:
