@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:test_build/account.dart';
+import 'package:test_build/api/identity.dart';
 import 'package:test_build/appsettings.dart';
 import 'package:test_build/taskscomplete.dart';
 import 'package:test_build/updatetasklist.dart';
@@ -17,6 +18,9 @@ void main() async {
   await FileSys.initFileSystem();
 
   ApiService.initService();
+
+  // Remove before building release mode
+  IdentityService.initDevMode();
 
   await TaskManager.initManager();
 
@@ -174,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(
-              FontAwesomeIcons.user,
+              FontAwesomeIcons.cloud,
               size: 32,
               )
           ),
