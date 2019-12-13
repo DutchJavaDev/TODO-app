@@ -12,10 +12,16 @@ class ResponseModel{
 
   ResponseModel.fromJson(Map<String,dynamic> json):
     isSuccess = json['success'],
-    statusCode = json['statuscode'],
+    statusCode = json['statusCode'],
     responseMessage = json['message'],
     responseData = json['data']
   ;
+
+  @override
+  String toString()
+  {
+    return "{success:$isSuccess, code:$statusCode, message:$responseMessage, data:${responseData == null ? "null" : responseData.toString()}}";
+  }
 }
 
 
