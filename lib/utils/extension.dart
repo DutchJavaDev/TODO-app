@@ -3,6 +3,17 @@ import 'package:validators/validators.dart';
 var _specialChars = "!\"#\$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
 extension StringUtils on String {
+
+  String prepend(String prepend)
+  {
+    return prepend+this;
+  }
+
+  String append(String append)
+  {
+    return this+append;
+  }
+
   bool isNullOrEmpty() {
     if (this == null) return true;
 
@@ -54,5 +65,12 @@ extension StringUtils on String {
     }
 
     return count > 0;
+  }
+}
+
+extension DynamicUtils on dynamic
+{
+  List<dynamic> toList(){
+    return this as List<dynamic>;
   }
 }
