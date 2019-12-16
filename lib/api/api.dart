@@ -13,7 +13,7 @@ class IdentityService {
   static final String _registerUrl = "Identity/register".prepend(_baseUrl);
   static final String _loginUrl = "Identity/login".prepend(_baseUrl);
   
-  static Future<ResponseModel> registerAccount(String userName, String userPassword) async {
+  Future<ResponseModel> registerAccount(String userName, String userPassword) async {
     var model = RegisterModel(userName, userPassword, FileSys.getAppType).toJson();
     
     var body = await _postRequest(_registerUrl,body: model);
@@ -23,7 +23,7 @@ class IdentityService {
     return ResponseModel.fromJson(json.decode(body));
   }
 
-  static Future<ResponseModel> requestJwtToken(String userEmail, String userPassword) async {
+  Future<ResponseModel> requestJwtToken(String userEmail, String userPassword) async {
     var model = LoginModel(userEmail, userPassword);
 
     var body = await _postRequest(_loginUrl,body: model);
@@ -42,18 +42,20 @@ class TaskService{
   //static final String _deleteTaskUrl = "Task/Delete".setPrefix(_baseUrl);
   static final String _deleteTaskByIdUrl = "Task/Delete/".prepend(_baseUrl);
 
-  static Future<bool> addTask(TaskModel model) async{
-
-    var body = await _postRequest(_addTaskUrl,body: json.encode(model.toJson()),header: _getHeaders());
+  Future<bool> addTask(TaskModel model) async{
+    
+    var body = await _postRequest(_addTaskUrl,body: model.toJson(),header: _getHeaders());
 
     if(body.contains("Failed")) return false;
 
     var response = ResponseModel.fromJson(jsonDecode(body));
 
+    print(response.responseData);
+
     return response.isSuccess;
   }
 
-  static Future<bool> updateTask(TaskModel model) async{
+  Future<bool> updateTask(TaskModel model) async{
     var body = await _postRequest(_updateTaskUrl,body: model.toJson(),header: _getHeaders()); 
 
     if(body.contains("Failed")) return false;
@@ -63,7 +65,7 @@ class TaskService{
     return response.isSuccess;
   }
 
-  static Future<List<TaskModel>> getAllTasks() async{
+  Future<List<TaskModel>> getAllTasks() async{
     var body = await _getRequest(_getAllTaskUrl,header: _getHeaders());
     
     if(body.contains("Failed")) return List<TaskModel>();
@@ -84,7 +86,7 @@ class TaskService{
     return tasks;
   }
 
-  static Future<bool> deleteTaskById(int id) async{
+  Future<bool> deleteTaskById(int id) async{
     var body = await _postRequest(_deleteTaskByIdUrl.append(id.toString()),header: _getHeaders());
 
     if(body.contains("Failed")) return false;
@@ -169,13 +171,13 @@ class TaskService{
       }
 
       if (body != null) {
-        request.add(utf8.encode(body));
+        request.add(utf8.encode(jsonEncode(body)));
       }
 
       HttpClientResponse response = await request.close();
 
       String reply = await response.transform(utf8.decoder).join();
-
+      
       client.close();
 
       return reply.isNullOrEmpty() ? "" : reply;
