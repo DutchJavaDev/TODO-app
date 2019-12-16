@@ -1,28 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get_it/get_it.dart';
 import 'package:test_build/account.dart';
-import 'package:test_build/api/identity.dart';
 import 'package:test_build/appsettings.dart';
 import 'package:test_build/taskscomplete.dart';
 import 'package:test_build/updatetasklist.dart';
 import 'package:test_build/widgets/taskwidget.dart';
+import 'models/models.dart';
 import 'updatetasklist.dart';
 import 'utils/filesys.dart' as FileSys;
-import 'utils/taskmanager.dart' as TaskManager;
-import 'api/apiservice.dart';
+import 'utils/taskmanager.dart';
+import 'api/api.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
   await FileSys.initFileSystem();
 
-  ApiService.initService();
+  GetIt getIt = GetIt.instance;
 
-  // Remove before building release mode
-  IdentityService.initDevMode();
-
-  await TaskManager.initManager();
+  getIt.registerSingleton<IdentityService>(IdentityService());
+  getIt.registerSingleton<TaskService>(TaskService());
+  getIt.registerSingleton<TaskManager>(TaskManager());
 
   runApp(MyApp());
 }
@@ -56,11 +55,16 @@ class _MyHomePageState extends State<MyHomePage> {
   double screenWidth;
   double screenHeight;
   CupertinoTabController _cupertinoTabController;
+  TaskManager _taskManager;
+  List<TaskModel> _tasks;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
-    _cupertinoTabController = CupertinoTabController(initialIndex: 2);
+    _cupertinoTabController = CupertinoTabController(initialIndex: 3);
+    _taskManager = GetIt.instance.get<TaskManager>();
+    _tasks = List<TaskModel>();
+    _refresh();
   }
 
   @override
@@ -69,16 +73,23 @@ class _MyHomePageState extends State<MyHomePage> {
     _cupertinoTabController.dispose();
   }
 
+  void _refresh() async{
+    List<TaskModel> i = (await _taskManager.getAll()).where((i) => !i.taskCompleted).toList();
+    setState(() {
+      _tasks = i;
+    });
+  }
+
   /// Updates the given task to done
-  void _setTaskToDone(String id) {
-    TaskManager.flipTaskStatus(id);
-    setState(() {});
+  void _setTaskToDone(int id) async{
+     await _taskManager.flipTaskStatus(id);
+    _refresh();
   }
 
   /// Creates the views for the tasks, adds a delete and edit button
-  List<Widget> createView() {
+  List<Widget> createView(){
     var items = List<Widget>();
-    for (var task in TaskManager.openTasks) {
+    for (var task in _tasks.where((i) => !i.taskCompleted)) {
 
       items.add(TaskView(
         leftAction: (taskId) {
@@ -135,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _editTaskPopUp({String id = ""}) async {
+  void _editTaskPopUp({int id = -1}) async {
     await showCupertinoModalPopup(
         context: context,
         builder: (BuildContext context) {
@@ -143,8 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
             taskId: id,
           );
         });
-
-    setState(() {});
+        _refresh();
   }
 
   void _updateTaskPopUp() async {
@@ -153,7 +163,8 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (BuildContext context) {
           return UpdateTaskList();
         });
-    setState(() {});
+   // _taskManager.forceUpdate();
+    _refresh();
   }
 
   void _accountPopUp() async
@@ -209,22 +220,18 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
         backgroundColor: CupertinoTheme.of(context).primaryColor,
-        currentIndex: 2,
         activeColor: CupertinoColors.activeGreen,
         inactiveColor: CupertinoColors.white,
         onTap: (index) {
-          if(index == 0)
-          {
+          if(index >= 0) _refresh();
+
+          if(index == 0){
             _accountPopUp();
             _cupertinoTabController.index = 3;
           }
 
           if (index == 4) {
             _updateTaskPopUp();
-            _cupertinoTabController.index = 3;
-          }
-
-          if (index == 4) {
             _cupertinoTabController.index = 3;
           }
         },
@@ -236,7 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return AppSettings();
 
           case 2:
-            return TasksCompleted();
+            return TasksCompleted(); // Bug: find a way to refresh this page when tapped on :/
 
           case 3:
             return _home();
