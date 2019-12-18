@@ -9,10 +9,10 @@ class TaskView extends StatelessWidget
 
   final TaskModel task;
 
-  final ValueChanged<String> leftAction;
+  final ValueChanged<int> leftAction;
   final Icon leftActionIcon;
 
-  final ValueChanged<String> rightAction;
+  final ValueChanged<int> rightAction;
   final Icon rightActionIcon;
 
   final Color _buttonColor = Color(0xff044762);

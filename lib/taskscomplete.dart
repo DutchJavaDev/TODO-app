@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'utils/taskmanager.dart' as TaskManager;
+import 'package:get_it/get_it.dart';
+import 'package:test_build/models/models.dart';
+import 'utils/taskmanager.dart';
 import 'widgets/taskwidget.dart';
 
 class TasksCompleted extends StatelessWidget {
@@ -21,12 +23,13 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
   double screenHeight;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
   }
 
-  void _deleteTaskDialog(String id) async {
-    var task = TaskManager.getTaskById(id);
+  Future<void> _deleteTaskDialog(int id) async {
+    var manager = GetIt.I.get<TaskManager>();
+    var task = manager.getTaskById(id);
 
     await showCupertinoDialog(
       context: context,
@@ -45,8 +48,8 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
             CupertinoDialogAction(
               child: Text("Yes delete", style: TextStyle(fontWeight: FontWeight.bold),),
               isDestructiveAction: true,
-              onPressed: (){
-                TaskManager.deleteTask(id);
+              onPressed: () async{
+                await manager.removeTask(id);
                 Navigator.of(context).pop();
               },
             ),
@@ -63,14 +66,14 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
     );
   }
 
-  List<Widget> createView() {
+  Widget createView(List<TaskModel> _tasks) {
     var items = List<Widget>();
 
-    for (var task in TaskManager.completedTask) {
+    for (var task in _tasks.where((i)=> i.taskCompleted)) {
       items.add(TaskView(
         task: task,
-        leftAction: (taskId){
-          TaskManager.flipTaskStatus(taskId);
+        leftAction: (taskId) async{
+          await GetIt.instance.get<TaskManager>().flipTaskStatus(task.taskId);
           setState(() {
             
           });
@@ -81,8 +84,8 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
           size: 24,
           ),
 
-        rightAction: (taskId){
-          _deleteTaskDialog(taskId);
+        rightAction: (taskId) async{
+          await _deleteTaskDialog(taskId);
           setState(() {
             
           });
@@ -107,14 +110,21 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
         padding: EdgeInsets.only(top: screenHeight / 2.5),
       ));
     }
-    return items;
+
+    return ListView(
+      children: items,
+    );
+  }
+
+  Future<List<TaskModel>> _fetchData() async{
+    return (await GetIt.instance.get<TaskManager>().getAll()).where((i) => i.taskCompleted).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
-    
+
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text("Completed tasks",
@@ -125,9 +135,15 @@ class TasksCompletedWidget extends State<TasksCompletedState> {
         transitionBetweenRoutes: true,
         backgroundColor: CupertinoTheme.of(context).primaryColor,
       ),
-      child: ListView(
-        children: createView(),
-        controller: ScrollController(),
+      child: FutureBuilder(
+        future: _fetchData(),
+        builder: (BuildContext context, AsyncSnapshot<List<TaskModel>> snapshot)
+        {
+          if(snapshot.hasError) return Center(child: Text("Woops something is not working"),);
+          if(snapshot.hasData) return createView(snapshot.data);
+          return Center(child: CircularProgressIndicator(),);
+        },
+
       ),
       backgroundColor: Colors.blueGrey,
     );

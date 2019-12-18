@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get_it/get_it.dart';
 import 'utils/extension.dart';
-import 'api/api.dart' as Api;
+import 'api/api.dart';
 
 class AccountPanel extends StatelessWidget {
   @override
@@ -17,6 +18,7 @@ class AccountPanelStateFul extends StatefulWidget {
 }
 
 class AccountPanelState extends State<AccountPanelStateFul> {
+
   bool login = false;
   bool register = false;
   bool hasEmail = false;
@@ -27,6 +29,7 @@ class AccountPanelState extends State<AccountPanelStateFul> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final IdentityService _identityService = GetIt.instance.get<IdentityService>();
 
   @override
   void initState() {
@@ -110,7 +113,7 @@ class AccountPanelState extends State<AccountPanelStateFul> {
   void _handleLogin() {}
 
   void _handleRegister() async {
-    var result = await Api.IdentityService.registerAccount(
+    var result = await _identityService.registerAccount(
         emailController.text, passwordController.text);
     print(result.toString());
     setState(() {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'utils/filesys.dart' as FileSys;
-import 'utils/taskmanager.dart' as TaskManager;
 
 class AppSettings extends StatelessWidget {
   @override
@@ -152,7 +151,9 @@ class AppSettingsState extends State<AppSettingsStateFull> {
                     "Are you sure you want to delete all active tasks?",
                     style: TextStyle(fontSize: 18),
                   ),
-                  TaskManager.deleteActiveTasks);
+                  ()=>{
+                    print("Todo delete all active task")
+                  });
             },
             color: _buttonColor,
           ),
@@ -178,7 +179,9 @@ class AppSettingsState extends State<AppSettingsStateFull> {
                     "Are you sure you want to delete all completed tasks?",
                     style: TextStyle(fontSize: 18),
                   ),
-                  TaskManager.deleteAllDoneTasks);
+                  ()=>{
+                    print("Todo delete all completed task cal")
+                  });
             },
             color: _buttonColor,
           ),
@@ -204,7 +207,9 @@ class AppSettingsState extends State<AppSettingsStateFull> {
                     "Are you sure you want to delete all tasks?",
                     style: TextStyle(fontSize: 18),
                   ),
-                  TaskManager.deleteAll);
+                  ()=>{
+                    print("Todo delete all tasks")
+                  });
             },
             color: _buttonColor,
           ),

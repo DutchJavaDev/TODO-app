@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'models/models.dart';
-import 'utils/taskmanager.dart' as TaskManager;
+import 'utils/taskmanager.dart';
 import 'utils/filesys.dart' as FileSys;
-import 'widgets/coloreditwidget.dart';
 
 class UpdateTaskList extends StatelessWidget {
-  final String taskId;
+  final int taskId;
 
-  UpdateTaskList({this.taskId = "null"});
+  UpdateTaskList({this.taskId = -1});
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +19,9 @@ class UpdateTaskList extends StatelessWidget {
 }
 
 class UpdateTaskListStateFull extends StatefulWidget {
-  final String taskId;
+  final int taskId;
 
-  UpdateTaskListStateFull({Key key, this.taskId = "null"}) : super(key: key);
+  UpdateTaskListStateFull({Key key, this.taskId = -1}) : super(key: key);
 
   @override
   UpdateTaskListState createState() => UpdateTaskListState();
@@ -39,17 +39,21 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
+  TaskManager _taskManager;
+
   @override
-  void initState() {
+  void initState(){
     super.initState();
+
+    _taskManager = GetIt.instance.get<TaskManager>();
 
     /// Listen for changes in the input
     titleController.addListener(titleListener);
     descriptionController.addListener(descriptionListener);
     settings = FileSys.getSettingsModel;
 
-    if (!(widget.taskId == "null")) {
-      model = TaskManager.getTaskById(widget.taskId);
+    if (!(widget.taskId == -1)) {
+      model = _taskManager.getTaskById(widget.taskId);
       titleController.text = model.taskTitle;
       descriptionController.text = model.taskDescription;
       taskColor = model.taskColor;
@@ -111,17 +115,15 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
         descriptionController.text.length > 0;
   }
 
-  bool submitTask() {
+  void submitTask() async{
     if (model != null) {
       model.taskTitle = titleController.text;
       model.taskDescription = descriptionController.text;
       model.taskColor = taskColor;
-      TaskManager.updateTask(model);
-      return true;
+      await _taskManager.updateTask(model);
     } else {
-      TaskManager.addTaskWithColor(
-          titleController.text, descriptionController.text, taskColor);
-      return true;
+      model = TaskModel(titleController.text,descriptionController.text,false,taskColor);
+      await _taskManager.addTask(model);
     }
   }
 
@@ -170,15 +172,6 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     return items;
   }
 
-  void editColors() async {
-    await showCupertinoDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return ColorEdit();
-        });
-    setState(() {});
-  }
-
   List<Widget> createColorGrid() {
     var colors = List<Widget>();
     var backgroundColors = settings.getBackgroundColors;
@@ -200,25 +193,6 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 : Colors.transparent),
       ));
     }
-
-    /// max 12 colors
-    // if(backgroundColors.length != 12)
-    // {
-    //   colors.add(RaisedButton(
-    //     onPressed: (){},
-    //     color: CupertinoColors.white,
-    //     child: Icon(
-    //       FontAwesomeIcons.plusCircle,
-    //       size: 24,
-    //       color: Colors.green,
-    //     ),
-    //   ));
-    // }
-
-    // colors.add(RaisedButton(
-    //   onPressed: editColors,
-    //   child: Icon(Icons.settings,size: 28,color: Colors.white,),
-    // ));
     return colors;
   }
 
@@ -226,7 +200,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: Text(""),
-        middle: Text(widget.taskId == "null" ? "Add Task" : "Edit Task",
+        middle: Text(widget.taskId == -1 ? "Add Task" : "Edit Task",
             style: TextStyle(fontSize: 24, color: CupertinoColors.white)),
         padding: EdgeInsetsDirectional.only(bottom: 5),
         backgroundColor: CupertinoTheme.of(context).primaryColor,
@@ -299,7 +273,7 @@ class UpdateTaskListState extends State<UpdateTaskListStateFull> {
                 child: CupertinoButton(
                   color: Color(0xff054961),
                   child: Text(
-                    widget.taskId == "null" ? "Save Task" : "Update Task",
+                    widget.taskId == -1 ? "Save Task" : "Update Task",
                     style: TextStyle(fontSize: 22, color: Colors.white),
                   ),
                   onPressed: isEnabled

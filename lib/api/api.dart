@@ -90,10 +90,7 @@ class TaskService{
     var body = await _postRequest(_deleteTaskByIdUrl.append(id.toString()),header: _getHeaders());
 
     if(body.contains("Failed")) return false;
-
-    var response = ResponseModel.fromJson(jsonDecode(body));
-
-    return response.isSuccess;
+    return true;
   }
 }
 

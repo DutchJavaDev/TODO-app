@@ -23,6 +23,8 @@ void main() async {
   getIt.registerSingleton<TaskService>(TaskService());
   getIt.registerSingleton<TaskManager>(TaskManager());
 
+  await getIt.get<TaskManager>().getAll();
+
   runApp(MyApp());
 }
 
@@ -55,16 +57,11 @@ class _MyHomePageState extends State<MyHomePage> {
   double screenWidth;
   double screenHeight;
   CupertinoTabController _cupertinoTabController;
-  TaskManager _taskManager;
-  List<TaskModel> _tasks;
 
   @override
   void initState(){
     super.initState();
     _cupertinoTabController = CupertinoTabController(initialIndex: 3);
-    _taskManager = GetIt.instance.get<TaskManager>();
-    _tasks = List<TaskModel>();
-    _refresh();
   }
 
   @override
@@ -73,35 +70,31 @@ class _MyHomePageState extends State<MyHomePage> {
     _cupertinoTabController.dispose();
   }
 
-  void _refresh() async{
-    List<TaskModel> i = (await _taskManager.getAll()).where((i) => !i.taskCompleted).toList();
-    setState(() {
-      _tasks = i;
-    });
+  Future<void> _setTaskToDone(int id) async{
+     await GetIt.instance.get<TaskManager>().flipTaskStatus(id);
   }
 
-  /// Updates the given task to done
-  void _setTaskToDone(int id) async{
-     await _taskManager.flipTaskStatus(id);
-    _refresh();
-  }
-
-  /// Creates the views for the tasks, adds a delete and edit button
-  List<Widget> createView(){
+  Widget createView(List<TaskModel> _tasks){
     var items = List<Widget>();
-    for (var task in _tasks.where((i) => !i.taskCompleted)) {
+    for (var task in _tasks) {
 
       items.add(TaskView(
-        leftAction: (taskId) {
-          _setTaskToDone(taskId);
+        leftAction: (taskId) async{
+          await _setTaskToDone(taskId);
+          setState(() {
+            
+          });
         },
         leftActionIcon: Icon(
           FontAwesomeIcons.check,
           color: Colors.greenAccent,
           size: 24,
         ),
-        rightAction: (taskId) {
-          _editTaskPopUp(id: taskId);
+        rightAction: (taskId) async{
+          await _editTaskPopUp(id: taskId);
+          setState(() {
+          
+        });
         },
         rightActionIcon: Icon(
           FontAwesomeIcons.edit,
@@ -124,8 +117,15 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: EdgeInsets.only(top: screenHeight / 2.5),
       ));
     }
-    return items;
+    return ListView(
+      children: items,
+    );
   }
+
+  Future<List<TaskModel>> _fetchData() async{
+    return (await GetIt.instance.get<TaskManager>().getAll()).where((i) => !i.taskCompleted).toList();
+  }
+
 
   Widget _home() {
     return CupertinoPageScaffold(
@@ -138,15 +138,21 @@ class _MyHomePageState extends State<MyHomePage> {
         transitionBetweenRoutes: true,
         backgroundColor: CupertinoTheme.of(context).primaryColor,
       ),
-      child: ListView(
-        children: createView(),
-        controller: ScrollController(),
+      child: FutureBuilder(
+
+        future: _fetchData(),
+        builder: (BuildContext context,AsyncSnapshot<List<TaskModel>> snapshot)
+        {
+          if(snapshot.hasError) return Center(child: Text("Woops something is not working"),);
+          if(snapshot.hasData) return createView(snapshot.data);
+          return Center(child: CircularProgressIndicator(),);
+        },
       ),
       backgroundColor: Colors.blueGrey,
     );
   }
 
-  void _editTaskPopUp({int id = -1}) async {
+  Future<void> _editTaskPopUp({int id = -1}) async {
     await showCupertinoModalPopup(
         context: context,
         builder: (BuildContext context) {
@@ -154,21 +160,25 @@ class _MyHomePageState extends State<MyHomePage> {
             taskId: id,
           );
         });
-        _refresh();
+
+        setState(() {
+          
+        });
   }
 
-  void _updateTaskPopUp() async {
+  Future<void> _updateTaskPopUp() async {
     await showCupertinoModalPopup(
         context: context,
         builder: (BuildContext context) {
           return UpdateTaskList();
         });
-   // _taskManager.forceUpdate();
-    _refresh();
+
+        setState(() {
+          
+        });
   }
 
-  void _accountPopUp() async
-  {
+  void _accountPopUp() async{
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context)
@@ -222,8 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: CupertinoTheme.of(context).primaryColor,
         activeColor: CupertinoColors.activeGreen,
         inactiveColor: CupertinoColors.white,
-        onTap: (index) {
-          if(index >= 0) _refresh();
+        onTap: (index)  async{
 
           if(index == 0){
             _accountPopUp();
@@ -231,11 +240,15 @@ class _MyHomePageState extends State<MyHomePage> {
           }
 
           if (index == 4) {
-            _updateTaskPopUp();
+            await _updateTaskPopUp();
+            setState(() {
+              
+            });
             _cupertinoTabController.index = 3;
           }
         },
       ),
+
       tabBuilder: (BuildContext context, int index) {
         switch (index) {
 

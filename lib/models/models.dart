@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'package:flutter/material.dart';
+
 import '../utils/extension.dart';
 
 class SettingsModel
@@ -15,7 +17,8 @@ class SettingsModel
   List<Color> get getBackgroundColors => _backgroundColors;
   double get getHeaderFontSize => _headerFontSize.toDouble();
   double get getDescriptionFontSize => _descriptionFontSize.toDouble();
-  bool get hasJwtToken => _jwtToken.isNullOrEmpty();
+  bool get hasJwtToken => !_jwtToken.isNullOrEmpty();
+  String get getJwtToken => _jwtToken;
   
   SettingsModel(this.colorIndex,this._backgroundColors,this.taskHeaderColor,this._headerFontSize,this._descriptionFontSize);
 
@@ -37,6 +40,11 @@ class SettingsModel
   void addColor(Color color)
   {
     _backgroundColors.add(color);
+  }
+
+  void setToken(String token)
+  {
+    _jwtToken = token;
   }
   
   SettingsModel.fromMappedJson(Map<String,dynamic> json) : 
@@ -79,27 +87,27 @@ class SettingsModel
 
 class TaskModel
 {
-  String taskId;
+  int taskId = 0;
   String taskTitle;
   String taskDescription;
-  bool taskDone;
+  bool taskCompleted;
   Color taskColor;
 
-  TaskModel(this.taskId, this.taskTitle, this.taskDescription, this.taskDone, this.taskColor);
+  TaskModel(this.taskTitle, this.taskDescription, this.taskCompleted, this.taskColor);
 
   TaskModel.fromMappedJson(Map<String, dynamic> json) :
-            taskId = json["taskId"].toString(),
+            taskId = int.parse(json["id"].toString()),
             taskTitle = json["taskTitle"].toString(),
             taskDescription = json["taskDescription"].toString(),
-            taskDone = json["taskDone"].toString().toLowerCase() == 'true',
+            taskCompleted = json["taskCompleted"].toString().toLowerCase() == 'true',
             taskColor = Color(int.parse(json["taskColor"].toString()));
 
   Map<String,dynamic> toJson() => {
-      "taskId":taskId,
-      "taskTitle":taskTitle,
-      "taskDescription":taskDescription,
-      "taskDone":taskDone,
-      "taskColor":taskColor.value
+      "id":taskId,
+      "tasktitle":taskTitle,
+      "taskdescription":taskDescription,
+      "taskcompleted":taskCompleted,
+      "taskcolor":taskColor.value.toString()
   };
 }
 
